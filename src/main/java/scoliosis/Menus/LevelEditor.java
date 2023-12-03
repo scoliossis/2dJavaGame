@@ -21,12 +21,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import static scoliosis.Display.mainframe;
-import static scoliosis.Game.levelreader;
-import static scoliosis.GameLibs.Velocity.xcoordinate;
-import static scoliosis.GameLibs.Velocity.ycoordinate;
+import static scoliosis.Game.*;
+import static scoliosis.GameLibs.MoveLib.*;
+import static scoliosis.GameLibs.Velocity.*;
 import static scoliosis.Libs.MouseLib.*;
 import static scoliosis.Main.resourcesFile;
 
@@ -52,31 +53,71 @@ public class LevelEditor {
 
     public static int xoffset = 0;
 
+    public static boolean testing = false;
+
+    public static String testmoves = "";
+
+    public static boolean showgrid = true;
+
+    public static int zoomed = 10;
+
+    static boolean askreset = false;
+
+    static boolean colorpicking = false;
+
+    static int blocktip = 0;
 
     public static void LevelEditor(BufferedImage bi, BufferStrategy bs) throws IOException {
         if (bs != null) {
-
-            if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
-                ScreenLib.changeScreen("title");
-                Files.write(Paths.get(resourcesFile + "/levelcreator.cfg"), Locations.toString().getBytes(StandardCharsets.UTF_8));
-
-                levelreader = "0,0,0,250,-16777216,0," + Files.readAllLines(Paths.get(resourcesFile + "/levelcreator.cfg")).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
-                Game.levelreaderSplit = levelreader.split(",");
-            }
-
-            if (KeyLib.keyPressed(KeyEvent.VK_R)) {
-                Locations.clear();
-            }
 
             Graphics g = bs.getDrawGraphics();
             BufferedImage image = ImageIO.read(new File(resourcesFile + "/background.png"));
             g.drawImage(image, 0, 0, ScreenLib.width, ScreenLib.height, null);
 
-            for (int i = xoffset%boxsize; i < 480; i+=boxsize) {
-                RenderLib.drawLine(i, 0, i, 270, new Color(32,32,32), g);
+            if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
+                if (askreset) askreset = false;
+                else ScreenLib.changeScreen("title");
+                testing = false;
             }
-            for (int i = 0; i < 270; i+=boxsize) {
-                RenderLib.drawLine(0, i, 480, i, new Color(32,32,32), g);
+
+            if (!askreset && KeyLib.keyPressed(KeyEvent.VK_R)) {
+                askreset = true;
+                //Locations.clear();
+            }
+            if (KeyLib.keyPressed(KeyEvent.VK_P)) {
+                testmoves = "";
+            }
+
+            if (KeyLib.keyPressed(KeyEvent.VK_T)) {
+                if (!Locations.isEmpty()) {
+                    ScreenLib.changeScreen("game");
+                    testing = true;
+                    xcoordinate = spawnx;
+                    ycoordinate = spawny;
+                    xvelocity = 0;
+                    yvelocity = 0;
+                    testmoves = "";
+                }
+                else System.out.println("level is empty bud!");
+            }
+
+            // bugged :(
+            /*
+            if (KeyLib.keyPressed(KeyEvent.VK_S)) {
+                zoomed-=1;
+            }
+            if (KeyLib.keyPressed(KeyEvent.VK_W)) {
+                zoomed+=1;
+            }
+             */
+
+            if (showgrid) {
+                for (int i = (int) (xoffset % (boxsize * zoomed/10f)); i < 480; i += (int) (boxsize*(zoomed / 10f))) {
+                    RenderLib.drawLine(i, 0, i, 270, new Color(32, 32, 32), g);
+                }
+                for (int i = 0; i < 270; i += (int) (boxsize*(zoomed / 10f))) {
+                    RenderLib.drawLine(0, i, 480, i, new Color(32, 32, 32), g);
+                }
             }
 
             int toremove = 0;
@@ -103,23 +144,54 @@ public class LevelEditor {
                 xoffset -= 1;
             }
 
+            Color hoveringcolor = new Color(0,0,0);
             if ((leftclicked || rightclicked) && (realmouseycoord() >= 35 || !showtopbar)) {
                 boolean dontadd = false;
                 for (int i = 0; i < Locations.size(); i += 6) {
-                    if ((int) Locations.get(i) == mousexcoord(boxsize) * boxsize-xoffset) {
-
+                    if ((int) Locations.get(i) == (int) ((((mousexcoord(boxsize) * boxsize-xoffset)  / (zoomed / 10f)) + (xoffset%boxsize)))) {
                         if ((int) Locations.get(i + 1) == mouseycoord(boxsize) * boxsize) {
                             dontadd = true;
                             toremove = i;
+                            if (leftclicked && !colorpicking) {
+                                if (new Color((Integer) Locations.get(i+4)) != new Color(redcolor, greencolor, bluecolor)) {
+                                    Locations.remove(toremove);
+                                    Locations.remove(toremove);
+                                    Locations.remove(toremove);
+                                    Locations.remove(toremove);
+                                    Locations.remove(toremove);
+                                    Locations.remove(toremove);
+
+                                    Locations.add((int) ((((mousexcoord(boxsize) * boxsize-xoffset)  / (zoomed / 10f)) + (xoffset%boxsize))));
+                                    Locations.add(mouseycoord(boxsize) * boxsize);
+                                    Locations.add((int) (1 * boxsize / (zoomed / 10f)));
+                                    Locations.add((int) (1 * boxsize / (zoomed / 10f)));
+
+                                    Locations.add(new Color(redcolor, greencolor, bluecolor).getRGB());
+                                    Locations.add(blocktype);
+                                }
+                            }
+
+                            if (colorpicking) {
+                                hoveringcolor = new Color((Integer) Locations.get(i + 4));
+                                blocktip = (int) Locations.get(i + 5);
+                            }
                         }
                     }
                 }
 
+                if (leftclicked == !mouseclicked && leftclicked && colorpicking) {
+                    colorpicking = false;
+                    redcolor = hoveringcolor.getRed();
+                    greencolor = hoveringcolor.getGreen();
+                    bluecolor = hoveringcolor.getBlue();
+                    blocktype = blocktip;
+                }
+
                 if (!dontadd && leftclicked) {
-                    Locations.add(mousexcoord(boxsize) * boxsize-xoffset);
+                    Locations.add((int) ((((mousexcoord(boxsize) * boxsize-xoffset)  / (zoomed / 10f)) + (xoffset%boxsize))));
                     Locations.add(mouseycoord(boxsize) * boxsize);
-                    Locations.add(1 * boxsize);
-                    Locations.add(1 * boxsize);
+                    Locations.add((int) (1 * boxsize / (zoomed / 10f)));
+                    Locations.add((int) (1 * boxsize / (zoomed / 10f)));
 
                     Locations.add(new Color(redcolor, greencolor, bluecolor).getRGB());
                     Locations.add(blocktype);
@@ -143,16 +215,34 @@ public class LevelEditor {
                 }
             }
 
-            RenderLib.drawCircle(50+xoffset, 175, 25, 25, new Color(160, 250, 239), g);
+            RenderLib.drawCircle((int) (50*(zoomed / 10f)+xoffset), (int) (200 - (25 * (zoomed / 10f))), (int) (25*(zoomed / 10f)), (int) (25*(zoomed / 10f)), new Color(160, 250, 239), g);
 
             for (int i = 0; i < Locations.size(); i+=6) {
-                RenderLib.drawRect((int) Locations.get(i)+xoffset, (int) Locations.get(i+1), (Integer) Locations.get(i+2), (Integer) Locations.get(i+3), new Color((Integer) Locations.get(i+4)), g);
+                RenderLib.drawRect((int) ((int) Locations.get(i) * (zoomed / 10f) +xoffset), ((int) Locations.get(i+1)), (int) (((int) Locations.get(i+2)*1f) * (zoomed / 10f)), (int) ((float) ((int) Locations.get(i+3)*1f) * (zoomed / 10f)), new Color((Integer) Locations.get(i+4)), g);
+                RenderLib.drawString(g, String.valueOf((int) Locations.get(i+5)), (int) ((int) Locations.get(i) * (zoomed / 10f) +xoffset)+3, ((int) Locations.get(i+1))+10, 10, "Comic Sans MS", 0, new Color(0, 0, 0));
                 //RenderLib.drawOutline((int) Locations.get(i) * 10, (int) Locations.get(i+1) * 10, 10, 10, new Color(255,255,255), g);
             }
 
             if (showtopbar) {
                 RenderLib.drawRect(0, 0, 480, 35, new Color(255, 255, 255), g);
                 RenderLib.drawLine(0, 35, 480, 35, new Color(95, 131, 224), g);
+
+                RenderLib.drawRect(5, 22, 27, 10, new Color(215, 216, 229), g);
+                RenderLib.drawOutline(5, 22, 27, 10, new Color(48, 51, 63), g);
+                RenderLib.drawPoligon(new int[] {7, 15, 7}, new int[] {22, 27, 32}, new Color(50, 124, 50), g);
+                RenderLib.drawString(g, "try", 16, 31, 11, "Comic Sans MS", 0, new Color(0, 0, 0));
+                if (isMouseOverCoords(5, 22, 27, 10) && leftclicked && !mouseclicked) {
+                    if (!Locations.isEmpty()) {
+                        ScreenLib.changeScreen("game");
+                        testing = true;
+                        xcoordinate = spawnx;
+                        ycoordinate = spawny;
+                        xvelocity = 0;
+                        yvelocity = 0;
+                        testmoves = "";
+                    }
+                    else System.out.println("empty level, please stop!");
+                }
 
                 RenderLib.drawRect(10, 5, 40, 14, new Color(215, 216, 229), g);
                 RenderLib.drawOutline(10, 5, 40, 14, new Color(48, 51, 63), g);
@@ -179,15 +269,24 @@ public class LevelEditor {
                 }
 
                 RenderLib.drawRect(70, 20, 10, 10, new Color(redcolor, greencolor, bluecolor), g);
-                RenderLib.drawOutline(70, 20, 10, 10, new Color(48, 51, 63), g);
-
+                if (!colorpicking) RenderLib.drawOutline(70, 20, 10, 10, new Color(48, 51, 63), g);
+                else RenderLib.drawOutline(70, 20, 10, 10, new Color(255, 0, 0), g);
+                if (isMouseOverCoords(70, 20, 10, 10) && leftclicked != mouseclicked && leftclicked) {
+                    colorpicking = true;
+                }
 
                 RenderLib.drawRect(170, 2, 30, 14, new Color(215, 216, 229), g);
                 RenderLib.drawOutline(170, 2, 30, 14, new Color(48, 51, 63), g);
-                RenderLib.drawString(g, "S: " + boxsize, 172, 14, 12, "Comic Sans MS", 0, new Color(0, 0, 0));
+                RenderLib.drawString(g, "S: " + (showgrid ? boxsize : "0"), 172, 14, 12, "Comic Sans MS", 0, new Color(0, 0, 0));
 
                 if (isMouseOverCoords(170, 2, 30, 14)) {
-                    boxsize = onenumreplace(boxsize, 2, 10);
+                    boxsize = onenumreplace(boxsize, 0, 10);
+                    if (onenumreplace(boxsize, 0, 10) != 10) showgrid = true;
+                    if (boxsize == 1) boxsize = 10;
+                    if (boxsize == 0) {
+                        showgrid = !showgrid;
+                        boxsize = 10;
+                    }
                 }
 
                 RenderLib.drawRect(170, 18, 30, 14, new Color(215, 216, 229), g);
@@ -195,7 +294,34 @@ public class LevelEditor {
                 RenderLib.drawString(g, "T: " + blocktype, 172, 30, 12, "Comic Sans MS", 0, new Color(0, 0, 0));
 
                 if (isMouseOverCoords(170, 18, 30, 14)) {
-                    blocktype = onenumreplace(blocktype, 0, 2);
+                    blocktype = onenumreplace(blocktype, 0, 4);
+                }
+            }
+
+            if (testmoves != "") {
+                String[] testsplit = testmoves.split(",");
+                for (int i = 0; i < testsplit.length; i+=2) {
+                    RenderLib.drawCircle((int) (Integer.parseInt(testsplit[i])*(zoomed / 10f)+xoffset), (int) (Integer.parseInt(testsplit[i+1]) - (25 * (zoomed / 10f))), (int) (charecterwidth*(zoomed / 10f)), (int) (charecterwidth*(zoomed / 10f)), new Color(93, 124, 124, 61), g);
+                    RenderLib.drawCircleOutline((int) (Integer.parseInt(testsplit[i])*(zoomed / 10f)+xoffset), (int) (Integer.parseInt(testsplit[i+1]) - (25 * (zoomed / 10f))), (int) (charecterwidth*(zoomed / 10f)), (int) (charecterwidth*(zoomed / 10f)), new Color(0, 0, 0, 61), g);
+                }
+            }
+
+            if (askreset) {
+                RenderLib.drawRect(0,0,480,270, new Color(0,0,0), g);
+                RenderLib.drawCenteredString(g, "ARE YOU SURE YOU WANT TO RESET LEVEL?", 200, 70, 15, "Comic Sans MS", 0, new Color(255,255,255));
+
+                RenderLib.drawRect(40,130,170,40, new Color(115, 255, 0), g);
+                RenderLib.drawRect(220,130,170,40, new Color(255, 0, 0), g);
+                RenderLib.drawString(g, "press \"ESCAPE\" to not", 45, 150, 15, "Comic Sans MS", 0, new Color(0,0,0));
+                RenderLib.drawString(g, "press \"R\" again to reset", 225, 150, 15, "Comic Sans MS", 0, new Color(0,0,0));
+
+                if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
+                    askreset = false;
+                }
+                if (KeyLib.keyPressed(KeyEvent.VK_R)) {
+                    askreset = false;
+                    Locations.clear();
+                    testmoves = "";
                 }
             }
 
@@ -226,6 +352,7 @@ public class LevelEditor {
 
     public static int onenumreplace(int num, int min, int max) {
         // CODED AT 3AM I WILL MAKE IT NOT LOOK LIKE THIS LATER IDFC
+
         if (KeyLib.keyPressed(KeyEvent.VK_0)) num = 0;
         else if (KeyLib.keyPressed(KeyEvent.VK_1)) num = 1;
         else if (KeyLib.keyPressed(KeyEvent.VK_2)) num = 2;

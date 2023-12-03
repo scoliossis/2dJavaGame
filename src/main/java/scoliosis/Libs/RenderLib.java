@@ -199,10 +199,10 @@ public class RenderLib {
     public static void drawCenteredString(Graphics graphics, String text, int x, int y, int fontsize, String fontname, int style, Color color) {
         Font font = new Font(fontname, style, (int) (fontsize/480f *(float) (mainframe.getWidth())));
         x = (int) (x/480f *(float) (mainframe.getWidth()));
-        x -= graphics.getFontMetrics().stringWidth(text)/2;
 
         graphics.setFont(font);
         graphics.setColor(color);
+        x -= graphics.getFontMetrics().stringWidth(text)/2;
 
         graphics.drawString(text, x, (int) (y/270f *(float) (mainframe.getHeight())));
     }
@@ -219,4 +219,16 @@ public class RenderLib {
         g.drawLine(x, y, x2, y2);
     }
 
+    public static void drawPoligon(int[] x, int[] y, Color color, Graphics g) {
+
+        g.setColor(color);
+
+        for (int i = 0; i < x.length; i++) {
+            x[i] = (int) (x[i]/480f *(float) (mainframe.getWidth()));
+            y[i] = (int) (y[i]/270f *(float) (mainframe.getHeight()));
+        }
+
+        g.fillPolygon(x, y, x.length);
+
+    }
 }

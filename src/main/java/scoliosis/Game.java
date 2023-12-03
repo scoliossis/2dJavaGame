@@ -4,6 +4,7 @@ import scoliosis.GameLibs.MoveLib;
 import scoliosis.Libs.KeyLib;
 import scoliosis.Libs.ScreenLib;
 import scoliosis.Libs.RenderLib;
+import scoliosis.Menus.LevelEditor;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -14,11 +15,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 
-import static scoliosis.GameLibs.MoveLib.onGround;
+import static scoliosis.GameLibs.MoveLib.*;
 import static scoliosis.GameLibs.Velocity.*;
 import static scoliosis.Libs.ScreenLib.height;
 import static scoliosis.Main.resourcesFile;
+import static scoliosis.Menus.LevelEditor.testing;
 
 
 public class Game {
@@ -48,62 +51,72 @@ public class Game {
     static int xtodraw = 0;
     static float fakex = 0;
 
+    public static Color colorofball = new Color(105, 105, 252);
+    public static Color outsidering = new Color(0, 0, 0);
+    public static double timespent = 0;
+    public static double time = System.currentTimeMillis();
+    public static int ticks = 0;
+
+    public static double extratimer = 0;
+
+    public static double fastesttime = 0d;
+
     public static void game(BufferedImage bi, BufferStrategy bs) throws IOException {
-
-        if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
-            ScreenLib.changeScreen("pause");
+        ticks++;
+        if (ticks == 1) {
+            time = System.currentTimeMillis();
         }
-
-
-        MoveLib.MoveLibChecks();
-
-
-        Color colorofball = new Color(105, 105, 252);
-        Color outsidering = new Color(0, 0, 0);
-        if (sprinting) {
-            colorofball = new Color(18, 166, 255);
-            outsidering = new Color(255, 255, 255);
-        }
-
-
-        if (xcoordinate < -30 || ycoordinate > 270 || KeyLib.keyPressed(KeyEvent.VK_R)) {
-            xcoordinate = 50;
-            ycoordinate = 200;
-            xvelocity = 0;
-            yvelocity = 0;
-        }
-
-        if (yvelocity < -2) {
-            charecterheight = 20;
-        }
-        else if (yvelocity > 2) {
-            charecterheight = 30;
-        }
-        else if (sprinting && !onGround) {
-            charecterheight = 23;
-        }
-
-        else {
-            charecterheight = 25;
-        }
-
-        timebeforetick = System.nanoTime();
-
-        double millisbetweentick = timebeforetick - timeaftertick;
-
-        timeaftertick = System.nanoTime();
-
-
-        // so it doesnt check too often.
-        if (System.currentTimeMillis() % 75 == 0)
-
-            // gets the amount of seconds between each frame, then divide 1 by it.
-            fps = 1 / (millisbetweentick / 1000000000);
 
         if (bs != null) {
             Graphics g = bs.getDrawGraphics();
             BufferedImage image = ImageIO.read(new File(resourcesFile + "/background.png"));
             g.drawImage(image, 0, 0, ScreenLib.width, ScreenLib.height, null);
+
+            if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
+                if (!testing) ScreenLib.changeScreen("pause");
+                else ScreenLib.changeScreen("leveleditor");
+            }
+
+
+            colorofball = new Color(105, 105, 252);
+            outsidering = new Color(0, 0, 0);
+            if (sprinting) {
+                colorofball = new Color(18, 166, 255);
+                outsidering = new Color(255, 255, 255);
+            }
+
+
+            // CHECKING IF DIED
+            if (ycoordinate > 270 || KeyLib.keyPressed(KeyEvent.VK_R)) {
+                KillPlayer();
+            }
+
+            if (yvelocity < -2) {
+                charecterheight = 20;
+            }
+            else if (yvelocity > 2) {
+                charecterheight = 30;
+            }
+            else if (sprinting && !onGround) {
+                charecterheight = 23;
+            }
+
+            else {
+                charecterheight = 25;
+            }
+
+            timebeforetick = System.nanoTime();
+
+            double millisbetweentick = timebeforetick - timeaftertick;
+
+            timeaftertick = System.nanoTime();
+
+
+            // so it doesnt check too often.
+            if (System.currentTimeMillis() % 75 == 0)
+
+            // gets the amount of seconds between each frame, then divide 1 by it.
+                fps = 1 / (millisbetweentick / 1000000000);
 
             //g.drawImage(bi, 0, 0, ScreenLib.width, ScreenLib.height, null);
 
@@ -149,9 +162,75 @@ public class Game {
                     RenderLib.drawRect(xtodraw, Integer.parseInt(levelreaderSplit[i+1]), Integer.parseInt(levelreaderSplit[i+2]), Integer.parseInt(levelreaderSplit[i+3]), new Color(Integer.parseInt(levelreaderSplit[i+4])), g);
                 }
             }
+            if (win) {
+                time = System.currentTimeMillis();
+                xvelocity = 0;
+                if (fastesttime == 0d || timespent <fastesttime) fastesttime = timespent;
+                RenderLib.drawCenteredString(g, "gg! completed in " + timespent, 230, 130, 30, "Comic Sans MS", 0, new Color(0, 0, 0));
+                RenderLib.drawCenteredString(g, "personal best: " + fastesttime + (fastesttime == timespent ? "(NEW PB)" : ""), 230, 170, 30, "Comic Sans MS", 1, new Color(227, 0, 174, 255));
+
+            }
+            else {
+                timespent = ((System.currentTimeMillis() - time) / 1000);
+            }
+
+            RenderLib.drawString(g, new DecimalFormat("#.###").format(timespent), 5, 20, 13, "Comic Sans MS", 0, new Color(52, 28, 54));
+
 
             g.dispose();
             bs.show();
+
+            MoveLib.MoveLibChecks();
+        }
+    }
+
+    public static void KillPlayer() {
+        xcoordinate = spawnx;
+        ycoordinate = spawny;
+        xvelocity = 0;
+        yvelocity = 0;
+        win = false;
+        ticks = 0;
+
+        if (testing) {
+            ScreenLib.changeScreen("leveleditor");
+            testing = false;
+        }
+    }
+
+    public static boolean win = false;
+
+    public static void win() {
+        win = true;
+    }
+
+    public static boolean mapworking = true;
+    public static void loadMap(String mapname) {
+        if (Files.exists(Paths.get(resourcesFile + "/" + mapname))) {
+            try {
+                levelreader = Files.readAllLines(Paths.get(resourcesFile + "/"+mapname)).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
+                if (!levelreader.isEmpty()) {
+                    mapworking = true;
+                    Game.levelreaderSplit = levelreader.split(",");
+                    for (int p = 0; p < Game.levelreaderSplit.length; p++) {
+                        LevelEditor.Locations.add(Integer.parseInt(Game.levelreaderSplit[p]));
+                    }
+                }
+                else {
+                    mapworking = false;
+                    System.out.println("current level is empty!");
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else {
+            System.out.println("map not found!");
+            try {
+                new File(resourcesFile + "/" + mapname).createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

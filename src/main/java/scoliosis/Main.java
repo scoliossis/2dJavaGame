@@ -21,22 +21,43 @@ import static scoliosis.Game.levelreader;
 
 public class Main{
 
+    /*
+    todo: as of 03/12/23 13:00
+    ---- level editor ----
+    color picker - added to list: 3/12/23 - DONE 03/12/23 14:32
+    show previous shit from practise - added to list: 3/12/23 - DONE 03/12/23 15:01
+    make gui to choose level - added to list: 3/12/23
+    change spawn point - added to list: 3/12/23
+    different blocks (lava, finish flag) - added to list: 3/12/23 - DONE 03/12/23 19:50
+    change background option - added to list: 3/12/23
+
+    ---- gameplay ----
+    make campaign - added to list: 3/12/23 - Started:
+        level 1 - 03/12/23 19:41
+
+    add timer - added to list: 3/12/23 - DONE 03/12/23 19:50
+    add enemies with set paths - added to list: 3/12/23
+    add music - added to list: 3/12/23
+    win screen - added to list: 3/12/23 - DONE 03/12/23 21:19
+    death screen / animation - added to list: 3/12/23
+    levels screen - added to list: 3/12/23
+    store multiple levels - added to list: 3/12/23 - DONE 03/12/23 21:16
+
+    ---- bug fixes ----
+    fix collision issues
+    moving while paused
+    no collisions if fps drop
+     */
+
     public static void main(String[] args) throws IOException {
         Toolkit.getDefaultToolkit().addAWTEventListener(new MouseLib(), AWTEvent.MOUSE_EVENT_MASK | AWTEvent.FOCUS_EVENT_MASK);
         loadresources();
-
-        if (Files.exists(Paths.get(resourcesFile + "/levelcreator.cfg"))) {
-            levelreader = "0,0,0,250,-16777216,0," + Files.readAllLines(Paths.get(resourcesFile + "/levelcreator.cfg")).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
-            Game.levelreaderSplit = levelreader.split(",");
-            for (int p = 0; p < Game.levelreaderSplit.length; p++) {
-                LevelEditor.Locations.add(Integer.parseInt(Game.levelreaderSplit[p]));
-            }
-        }
-
+        Game.loadMap(maptoload);
 
         Display.DrawDisplay();
     }
 
+    public static String maptoload = "levelcreator.cfg";
 
     public static String scoliosis = System.getenv("APPDATA") + "\\scoliosis";
     public static String baseName = System.getenv("APPDATA") + "\\scoliosis\\2dBallGame";

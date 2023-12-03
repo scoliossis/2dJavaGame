@@ -5,6 +5,7 @@ import scoliosis.Game;
 import scoliosis.Libs.MouseLib;
 import scoliosis.Libs.RenderLib;
 import scoliosis.Libs.ScreenLib;
+import scoliosis.Main;
 import scoliosis.Options.Config;
 
 import javax.imageio.ImageIO;
@@ -18,6 +19,7 @@ import java.nio.file.Paths;
 
 import static scoliosis.Display.mainframe;
 import static scoliosis.Game.levelreader;
+import static scoliosis.Game.mapworking;
 import static scoliosis.Main.resourcesFile;
 
 public class TitleScreen {
@@ -47,30 +49,18 @@ public class TitleScreen {
 
                     if (leftclicked != MouseLib.leftclicked && MouseLib.leftclicked) {
                         if (i == 0) {
-                            MouseLib.leftclicked = false;
-                            leftclicked = false;
-
-                            ScreenLib.changeScreen("game");
-
-                            levelreader = "0,0,0,250,-16777216,0," + Files.readAllLines(Paths.get(resourcesFile + "/levelcreator.cfg")).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
-                            Game.levelreaderSplit = levelreader.split(",");
-
-                            sillytime = System.currentTimeMillis();
+                            if (mapworking) ScreenLib.changeScreen("game");
+                            else System.out.println("map not currently working! please try it in the editor");
                         }
                         if (i == 1) {
-                            MouseLib.leftclicked = false;
-                            leftclicked = false;
                             ScreenLib.changeScreen("options");
-
-                            Config.load();
                         }
                         if (i == 2) {
-                            MouseLib.leftclicked = false;
-                            leftclicked = false;
                             ScreenLib.changeScreen("leveleditor");
                         }
 
                     }
+                    leftclicked = MouseLib.leftclicked;
                 } else {
 
                     RenderLib.drawString(g, titlebuttons[i], 0, 270 - 140 + (i * 40), 40, "SansSerif", Font.ITALIC, new Color(162, 159, 159));

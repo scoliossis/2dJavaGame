@@ -6,13 +6,17 @@ import java.awt.event.KeyEvent;
 
 import static scoliosis.Game.*;
 import static scoliosis.GameLibs.Velocity.*;
-import static scoliosis.Libs.ScreenLib.height;
+import static scoliosis.Menus.LevelEditor.*;
 
 public class MoveLib {
 
     public static boolean onGround = false;
     public static boolean onWall = false;
     public static boolean onCeiling = false;
+
+    public static int spawnx = 50;
+    public static int spawny = 200;
+
 
 
     public static int wallx = 0;
@@ -31,17 +35,30 @@ public class MoveLib {
 
     static boolean sprintedInAir = false;
 
+    static int testingticks = 0;
+
     public static void MoveLibChecks() {
 
         if (((System.currentTimeMillis() - timelast) + leftovertime) / 20 >= 1f) {
 
+            if (testing) {
+                if (testingticks > 3) {
+                    testingticks = 0;
+                    testmoves += xcoordinate + "," + ycoordinate + ",";
+                }
+            }
+            testingticks++;
 
             // in case of low fps
             leftovertime = (System.currentTimeMillis() - timelast) - 50;
 
+            float ogxvelo = xvelocity;
+            float ogyvelo = yvelocity;
+
             while (leftovertime >= 50) {
                 leftovertime-=50;
-                xcoordinate += (int) xvelocity;
+                xvelocity += ogxvelo;
+                yvelocity += ogyvelo;
             }
 
             onCeiling = false;
@@ -51,7 +68,7 @@ public class MoveLib {
 
             for (int i = 0; i < levelreaderSplit.length; i+=6) {
 
-                if (Integer.parseInt(levelreaderSplit[i+5]) == 0) {
+                if (Integer.parseInt(levelreaderSplit[i+5]) == 0 || Integer.parseInt(levelreaderSplit[i+5]) == 3 || Integer.parseInt(levelreaderSplit[i+5]) == 4) {
                     // check if over a x coordinate
                     if (Integer.parseInt(levelreaderSplit[i]) < xcoordinate + 25 && Integer.parseInt(levelreaderSplit[i]) + Integer.parseInt(levelreaderSplit[i+2]) >= xcoordinate) {
 
@@ -65,19 +82,31 @@ public class MoveLib {
                                 yvelocity += 2f;
                             }
 
+                            if (Integer.parseInt(levelreaderSplit[i+5]) == 3) KillPlayer();
+
+                            if (Integer.parseInt(levelreaderSplit[i+5]) == 4) win();
+
                         }
 
 
                         // on ground check
-                        else if (Integer.parseInt(levelreaderSplit[i+1]) <= ycoordinate && Integer.parseInt(levelreaderSplit[i+1]) + Integer.parseInt(levelreaderSplit[i+3]) >= ycoordinate) {
+                        if (Integer.parseInt(levelreaderSplit[i+1]) <= ycoordinate && Integer.parseInt(levelreaderSplit[i+1]) + Integer.parseInt(levelreaderSplit[i+3]) >= ycoordinate) {
                             floory = (int) Integer.parseInt(levelreaderSplit[i+1]);
                             onGround = true;
                             sprintedInAir = false;
+
+                            if (Integer.parseInt(levelreaderSplit[i+5]) == 3) KillPlayer();
+                            if (Integer.parseInt(levelreaderSplit[i+5]) == 4) win();
+
                         }
 
                         // stops going through ceiling
                         if (Integer.parseInt(levelreaderSplit[i+1]) + Integer.parseInt(levelreaderSplit[i+3]) <= ycoordinate && Integer.parseInt(levelreaderSplit[i+1]) + Integer.parseInt(levelreaderSplit[i+3]) >= ycoordinate - yvelocity && !onWall && !onGround) {
                             yvelocity *= -2f;
+
+                            if (Integer.parseInt(levelreaderSplit[i+5]) == 3) KillPlayer();
+                            if (Integer.parseInt(levelreaderSplit[i+5]) == 4) win();
+
                         }
 
 
@@ -85,6 +114,9 @@ public class MoveLib {
                         if (ycoordinate <= Integer.parseInt(levelreaderSplit[i+1]) + Integer.parseInt(levelreaderSplit[i+3]) && ycoordinate - yvelocity >=Integer.parseInt(levelreaderSplit[i+1]) + Integer.parseInt(levelreaderSplit[i+3])) {
                             yvelocity = 2f;
                             doyVelocity = false;
+
+                            if (Integer.parseInt(levelreaderSplit[i+5]) == 3) KillPlayer();
+                            if (Integer.parseInt(levelreaderSplit[i+5]) == 4) win();
                         }
 
                     }
@@ -105,6 +137,7 @@ public class MoveLib {
                             xcoordinate = (int) (Integer.parseInt(levelreaderSplit[i]) + Integer.parseInt(levelreaderSplit[i+2]));
                             if (charecterheight > Integer.parseInt(levelreaderSplit[i+3])) yvelocity += 2f;
                             xvelocity *= -1.3f;
+
                         }
                     }
                 }
