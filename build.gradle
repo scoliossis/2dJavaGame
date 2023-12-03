@@ -1,0 +1,47 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+
+plugins {
+    id 'java'
+}
+
+group = 'scoliosis'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+    createFile()
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.10.1'
+}
+
+jar {
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes "Main-Class": "scoliosis.Main"
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+static void createFile() {
+    if (new File("src/main/resources/files.txt").exists()) new File("src/main/resources/files.txt").delete();
+    String files = ""
+    for (File file : Objects.requireNonNull(Paths.get("src/main/resources/").toFile().listFiles())) {
+        files+=","+file.getName()
+        System.out.println(file)
+    }
+    BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/files.txt"))
+    writer.write(files);
+    writer.close();
+}
+
+test {
+    useJUnitPlatform()
+}
