@@ -21,6 +21,7 @@ import static scoliosis.GameLibs.MoveLib.*;
 import static scoliosis.GameLibs.Velocity.*;
 import static scoliosis.Libs.ScreenLib.height;
 import static scoliosis.Main.resourcesFile;
+import static scoliosis.Main.textures;
 import static scoliosis.Menus.LevelEditor.testing;
 
 
@@ -159,7 +160,7 @@ public class Game {
             for (int i = 0; i < levelreaderSplit.length; i+=6) {
                 if (Integer.parseInt(levelreaderSplit[i+5]) == 0) {
                     xtodraw = Integer.parseInt(levelreaderSplit[i]) - fakefakex + 75;
-                    RenderLib.drawRect(xtodraw, Integer.parseInt(levelreaderSplit[i+1]), Integer.parseInt(levelreaderSplit[i+2]), Integer.parseInt(levelreaderSplit[i+3]), new Color(Integer.parseInt(levelreaderSplit[i+4])), g);
+                    RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i+1]), Integer.parseInt(levelreaderSplit[i+2]), Integer.parseInt(levelreaderSplit[i+3]), textures[Integer.parseInt(levelreaderSplit[i+4])], g);
                 }
             }
             if (win) {

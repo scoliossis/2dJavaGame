@@ -1,1 +1,1 @@
-,background.png,pop.wav,pop2.wav,titlescreen.png
+,background.png,dirt.png,grass.png,lavabackground.png,lavabrick.png,levelcreator.cfg,pop.wav,pop2.wav,titlescreen.png

@@ -29,6 +29,7 @@ public class Main{
     make gui to choose level - added to list: 3/12/23
     change spawn point - added to list: 3/12/23
     different blocks (lava, finish flag) - added to list: 3/12/23 - DONE 03/12/23 19:50
+    custom block textures - added to list: 3/12/23 - DONE 04/12/23 20:32
     change background option - added to list: 3/12/23
 
     ---- gameplay ----
@@ -57,7 +58,9 @@ public class Main{
         Display.DrawDisplay();
     }
 
-    public static String maptoload = "levelcreator.cfg";
+    public static String maptoload = "hello.cfg";
+    public static String[] textures = {"dirt", "grass", "lavabrick"};
+
 
     public static String scoliosis = System.getenv("APPDATA") + "\\scoliosis";
     public static String baseName = System.getenv("APPDATA") + "\\scoliosis\\2dBallGame";

@@ -2,9 +2,14 @@ package scoliosis.Libs;
 
 import scoliosis.Display;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 import static scoliosis.Display.*;
+import static scoliosis.Main.resourcesFile;
 
 public class RenderLib {
 
@@ -230,5 +235,22 @@ public class RenderLib {
 
         g.fillPolygon(x, y, x.length);
 
+    }
+
+
+
+    public static void drawImage(int x, int y, int width, int height, String path, Graphics g) {
+        x = (int) (x/480f *(float) (mainframe.getWidth()));
+        y = (int) (y/270f *(float) (mainframe.getHeight()));
+
+        height =  (int) (height/270f *(float) (mainframe.getHeight())) + 1;
+        width = (int) (width/480f *(float) (mainframe.getWidth())) + 1;
+        try {
+            BufferedImage image = ImageIO.read(new File(resourcesFile + "/" + path + ".png"));
+
+            g.drawImage(image, x, y, width, height, null);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

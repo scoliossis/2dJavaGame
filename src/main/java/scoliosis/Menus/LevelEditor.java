@@ -30,6 +30,7 @@ import static scoliosis.GameLibs.MoveLib.*;
 import static scoliosis.GameLibs.Velocity.*;
 import static scoliosis.Libs.MouseLib.*;
 import static scoliosis.Main.resourcesFile;
+import static scoliosis.Main.textures;
 
 public class LevelEditor {
 
@@ -43,10 +44,6 @@ public class LevelEditor {
     public static ArrayList Locations = new ArrayList<Integer>();
 
     public static boolean showtopbar = true;
-
-    public static int redcolor = 0;
-    public static int greencolor = 0;
-    public static int bluecolor = 0;
 
     public static int boxsize = 10;
     public static int blocktype = 0;
@@ -63,9 +60,10 @@ public class LevelEditor {
 
     static boolean askreset = false;
 
-    static boolean colorpicking = false;
 
     static int blocktip = 0;
+
+    public static int block = 0;
 
     public static void LevelEditor(BufferedImage bi, BufferStrategy bs) throws IOException {
         if (bs != null) {
@@ -144,7 +142,6 @@ public class LevelEditor {
                 xoffset -= 1;
             }
 
-            Color hoveringcolor = new Color(0,0,0);
             if ((leftclicked || rightclicked) && (realmouseycoord() >= 35 || !showtopbar)) {
                 boolean dontadd = false;
                 for (int i = 0; i < Locations.size(); i += 6) {
@@ -152,8 +149,8 @@ public class LevelEditor {
                         if ((int) Locations.get(i + 1) == mouseycoord(boxsize) * boxsize) {
                             dontadd = true;
                             toremove = i;
-                            if (leftclicked && !colorpicking) {
-                                if (new Color((Integer) Locations.get(i+4)) != new Color(redcolor, greencolor, bluecolor)) {
+                            if (leftclicked) {
+                                if ((Integer) Locations.get(i+4) != block) {
                                     Locations.remove(toremove);
                                     Locations.remove(toremove);
                                     Locations.remove(toremove);
@@ -166,25 +163,12 @@ public class LevelEditor {
                                     Locations.add((int) (1 * boxsize / (zoomed / 10f)));
                                     Locations.add((int) (1 * boxsize / (zoomed / 10f)));
 
-                                    Locations.add(new Color(redcolor, greencolor, bluecolor).getRGB());
+                                    Locations.add(block);
                                     Locations.add(blocktype);
                                 }
                             }
-
-                            if (colorpicking) {
-                                hoveringcolor = new Color((Integer) Locations.get(i + 4));
-                                blocktip = (int) Locations.get(i + 5);
-                            }
                         }
                     }
-                }
-
-                if (leftclicked == !mouseclicked && leftclicked && colorpicking) {
-                    colorpicking = false;
-                    redcolor = hoveringcolor.getRed();
-                    greencolor = hoveringcolor.getGreen();
-                    bluecolor = hoveringcolor.getBlue();
-                    blocktype = blocktip;
                 }
 
                 if (!dontadd && leftclicked) {
@@ -193,7 +177,7 @@ public class LevelEditor {
                     Locations.add((int) (1 * boxsize / (zoomed / 10f)));
                     Locations.add((int) (1 * boxsize / (zoomed / 10f)));
 
-                    Locations.add(new Color(redcolor, greencolor, bluecolor).getRGB());
+                    Locations.add(block);
                     Locations.add(blocktype);
 
                 }
@@ -207,7 +191,7 @@ public class LevelEditor {
                     Locations.remove(toremove);
                     // h
                     Locations.remove(toremove);
-                    // color
+                    // block
                     Locations.remove(toremove);
                     // block type
                     Locations.remove(toremove);
@@ -218,7 +202,8 @@ public class LevelEditor {
             RenderLib.drawCircle((int) (50*(zoomed / 10f)+xoffset), (int) (200 - (25 * (zoomed / 10f))), (int) (25*(zoomed / 10f)), (int) (25*(zoomed / 10f)), new Color(160, 250, 239), g);
 
             for (int i = 0; i < Locations.size(); i+=6) {
-                RenderLib.drawRect((int) ((int) Locations.get(i) * (zoomed / 10f) +xoffset), ((int) Locations.get(i+1)), (int) (((int) Locations.get(i+2)*1f) * (zoomed / 10f)), (int) ((float) ((int) Locations.get(i+3)*1f) * (zoomed / 10f)), new Color((Integer) Locations.get(i+4)), g);
+                RenderLib.drawImage((int) ((int) Locations.get(i) * (zoomed / 10f) +xoffset), ((int) Locations.get(i+1)), (int) (((int) Locations.get(i+2)*1f) * (zoomed / 10f)), (int) ((float) ((int) Locations.get(i+3)*1f) * (zoomed / 10f)), textures[(int) Locations.get(i+4)], g);
+                //RenderLib.drawRect((int) ((int) Locations.get(i) * (zoomed / 10f) +xoffset), ((int) Locations.get(i+1)), (int) (((int) Locations.get(i+2)*1f) * (zoomed / 10f)), (int) ((float) ((int) Locations.get(i+3)*1f) * (zoomed / 10f)), new Color((Integer) Locations.get(i+4)), g);
                 RenderLib.drawString(g, String.valueOf((int) Locations.get(i+5)), (int) ((int) Locations.get(i) * (zoomed / 10f) +xoffset)+3, ((int) Locations.get(i+1))+10, 10, "Comic Sans MS", 0, new Color(0, 0, 0));
                 //RenderLib.drawOutline((int) Locations.get(i) * 10, (int) Locations.get(i+1) * 10, 10, 10, new Color(255,255,255), g);
             }
@@ -244,37 +229,6 @@ public class LevelEditor {
                     else System.out.println("empty level, please stop!");
                 }
 
-                RenderLib.drawRect(10, 5, 40, 14, new Color(215, 216, 229), g);
-                RenderLib.drawOutline(10, 5, 40, 14, new Color(48, 51, 63), g);
-                RenderLib.drawString(g, "R: " + redcolor, 12, 17, 12, "Comic Sans MS", 0, new Color(0, 0, 0));
-
-                if (isMouseOverCoords(10, 5, 40, 14)) {
-                    redcolor = colorTextBox(redcolor);
-                }
-
-                RenderLib.drawRect(60, 5, 40, 14, new Color(215, 216, 229), g);
-                RenderLib.drawOutline(60, 5, 40, 14, new Color(48, 51, 63), g);
-                RenderLib.drawString(g, "G: " + greencolor, 62, 17, 12, "Comic Sans MS", 0, new Color(0, 0, 0));
-
-                if (isMouseOverCoords(60, 5, 40, 14)) {
-                    greencolor = colorTextBox(greencolor);
-                }
-
-                RenderLib.drawRect(110, 5, 40, 14, new Color(215, 216, 229), g);
-                RenderLib.drawOutline(110, 5, 40, 14, new Color(48, 51, 63), g);
-                RenderLib.drawString(g, "B: " + bluecolor, 112, 17, 12, "Comic Sans MS", 0, new Color(0, 0, 0));
-
-                if (isMouseOverCoords(110, 8, 40, 14)) {
-                    bluecolor = colorTextBox(bluecolor);
-                }
-
-                RenderLib.drawRect(70, 20, 10, 10, new Color(redcolor, greencolor, bluecolor), g);
-                if (!colorpicking) RenderLib.drawOutline(70, 20, 10, 10, new Color(48, 51, 63), g);
-                else RenderLib.drawOutline(70, 20, 10, 10, new Color(255, 0, 0), g);
-                if (isMouseOverCoords(70, 20, 10, 10) && leftclicked != mouseclicked && leftclicked) {
-                    colorpicking = true;
-                }
-
                 RenderLib.drawRect(170, 2, 30, 14, new Color(215, 216, 229), g);
                 RenderLib.drawOutline(170, 2, 30, 14, new Color(48, 51, 63), g);
                 RenderLib.drawString(g, "S: " + (showgrid ? boxsize : "0"), 172, 14, 12, "Comic Sans MS", 0, new Color(0, 0, 0));
@@ -296,6 +250,21 @@ public class LevelEditor {
                 if (isMouseOverCoords(170, 18, 30, 14)) {
                     blocktype = onenumreplace(blocktype, 0, 4);
                 }
+
+                RenderLib.drawRect(210, 3, 210, 25, new Color(215, 216, 229), g);
+                RenderLib.drawOutline(210, 3, 210, 25, new Color(48, 51, 63), g);
+
+                for (int i = 0; i < textures.length; i++) {
+                    RenderLib.drawImage(215 + (i * 12), 5, 10, 10, textures[i], g);
+                    if (i == block) {
+                        RenderLib.drawOutline(215 + (i * 12), 5, 10, 10, new Color(238, 4, 78), g);
+                    }
+
+                    if (isMouseOverCoords(215 + (i * 12), 5, 10, 10) && leftclicked && !mouseclicked) {
+                        block = i;
+                    }
+                }
+
             }
 
             if (testmoves != "") {
