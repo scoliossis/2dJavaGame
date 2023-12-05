@@ -1,24 +1,14 @@
 package scoliosis.Menus;
 
-import scoliosis.Display;
-import scoliosis.Game;
 import scoliosis.Libs.MouseLib;
 import scoliosis.Libs.RenderLib;
 import scoliosis.Libs.ScreenLib;
-import scoliosis.Main;
-import scoliosis.Options.Config;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import static scoliosis.Display.mainframe;
-import static scoliosis.Game.levelreader;
 import static scoliosis.Game.mapworking;
 import static scoliosis.Main.resourcesFile;
 

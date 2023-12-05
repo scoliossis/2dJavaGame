@@ -70,6 +70,10 @@ public class ScreenLib {
             }
         }
 
+        if (screenname == "game") {
+            Game.findfinish = true;
+        }
+
         Display.titlescreen = false;
         Display.optionsmenu = false;
         Display.ingame = false;

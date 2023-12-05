@@ -1,1 +1,1 @@
-,background.png,dirt.png,grass.png,lavabackground.png,lavabrick.png,levelcreator.cfg,pop.wav,pop2.wav,titlescreen.png
+,background.png,base.png,bluebrick.png,brick.png,brownbrick.png,circle.png,coal.png,dirt.png,flagpole.png,grass.png,lava.png,lavabackground.png,lavabrick.png,poison.png,pop.wav,pop2.wav,purplebrick.png,redbrick.png,sand.png,smoke.png,square.png,titlescreen.png,triangle.png,whitebrick.png

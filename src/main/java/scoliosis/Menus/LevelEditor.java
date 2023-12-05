@@ -29,8 +29,7 @@ import static scoliosis.Game.*;
 import static scoliosis.GameLibs.MoveLib.*;
 import static scoliosis.GameLibs.Velocity.*;
 import static scoliosis.Libs.MouseLib.*;
-import static scoliosis.Main.resourcesFile;
-import static scoliosis.Main.textures;
+import static scoliosis.Main.*;
 
 public class LevelEditor {
 
@@ -69,7 +68,7 @@ public class LevelEditor {
         if (bs != null) {
 
             Graphics g = bs.getDrawGraphics();
-            BufferedImage image = ImageIO.read(new File(resourcesFile + "/background.png"));
+            BufferedImage image = ImageIO.read(new File(resourcesFile + "/"+ backgroundpic));
             g.drawImage(image, 0, 0, ScreenLib.width, ScreenLib.height, null);
 
             if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
@@ -202,10 +201,10 @@ public class LevelEditor {
             RenderLib.drawCircle((int) (50*(zoomed / 10f)+xoffset), (int) (200 - (25 * (zoomed / 10f))), (int) (25*(zoomed / 10f)), (int) (25*(zoomed / 10f)), new Color(160, 250, 239), g);
 
             for (int i = 0; i < Locations.size(); i+=6) {
-                RenderLib.drawImage((int) ((int) Locations.get(i) * (zoomed / 10f) +xoffset), ((int) Locations.get(i+1)), (int) (((int) Locations.get(i+2)*1f) * (zoomed / 10f)), (int) ((float) ((int) Locations.get(i+3)*1f) * (zoomed / 10f)), textures[(int) Locations.get(i+4)], g);
-                //RenderLib.drawRect((int) ((int) Locations.get(i) * (zoomed / 10f) +xoffset), ((int) Locations.get(i+1)), (int) (((int) Locations.get(i+2)*1f) * (zoomed / 10f)), (int) ((float) ((int) Locations.get(i+3)*1f) * (zoomed / 10f)), new Color((Integer) Locations.get(i+4)), g);
-                RenderLib.drawString(g, String.valueOf((int) Locations.get(i+5)), (int) ((int) Locations.get(i) * (zoomed / 10f) +xoffset)+3, ((int) Locations.get(i+1))+10, 10, "Comic Sans MS", 0, new Color(0, 0, 0));
-                //RenderLib.drawOutline((int) Locations.get(i) * 10, (int) Locations.get(i+1) * 10, 10, 10, new Color(255,255,255), g);
+                if ((int) ((int) Locations.get(i) * (zoomed / 10f) +xoffset) <= 480 && (int) ((int) Locations.get(i) * (zoomed / 10f) +xoffset) + (int) (((int) Locations.get(i+2)*1f) * (zoomed / 10f)) >= 0) {
+                    RenderLib.drawImage((int) ((int) Locations.get(i) * (zoomed / 10f) + xoffset), ((int) Locations.get(i + 1)), (int) (((int) Locations.get(i + 2) * 1f) * (zoomed / 10f)), (int) ((float) ((int) Locations.get(i + 3) * 1f) * (zoomed / 10f)), (int) Locations.get(i + 4), g);
+                    RenderLib.drawString(g, String.valueOf((int) Locations.get(i + 5)), (int) ((int) Locations.get(i) * (zoomed / 10f) + xoffset) + 3, ((int) Locations.get(i + 1)) + 10, 10, "Comic Sans MS", 0, new Color(0, 0, 0));
+                }
             }
 
             if (showtopbar) {
@@ -251,16 +250,18 @@ public class LevelEditor {
                     blocktype = onenumreplace(blocktype, 0, 4);
                 }
 
-                RenderLib.drawRect(210, 3, 210, 25, new Color(215, 216, 229), g);
-                RenderLib.drawOutline(210, 3, 210, 25, new Color(48, 51, 63), g);
+                RenderLib.drawRect(210, 3, 210, 26, new Color(215, 216, 229), g);
+                RenderLib.drawOutline(210, 3, 210, 26, new Color(48, 51, 63), g);
 
                 for (int i = 0; i < textures.length; i++) {
-                    RenderLib.drawImage(215 + (i * 12), 5, 10, 10, textures[i], g);
+                    int xcoord = (215 + (i * 12) - (204*(i/17)));
+                    int ycoord = 5 + (12*(i/17));
+                    RenderLib.drawImage(xcoord, ycoord, 10, 10, i, g);
                     if (i == block) {
-                        RenderLib.drawOutline(215 + (i * 12), 5, 10, 10, new Color(238, 4, 78), g);
+                        RenderLib.drawOutline(xcoord, ycoord, 10, 10, new Color(238, 4, 78), g);
                     }
 
-                    if (isMouseOverCoords(215 + (i * 12), 5, 10, 10) && leftclicked && !mouseclicked) {
+                    if (isMouseOverCoords(xcoord, ycoord, 10, 10) && leftclicked && !mouseclicked) {
                         block = i;
                     }
                 }

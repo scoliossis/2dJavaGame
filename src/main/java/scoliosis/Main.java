@@ -34,20 +34,25 @@ public class Main{
 
     ---- gameplay ----
     make campaign - added to list: 3/12/23 - Started:
-        level 1 - 03/12/23 19:41
+        level 1-1 - 03/12/23 19:41
+        level 8-1 - 05/12/23 8:20
 
     add timer - added to list: 3/12/23 - DONE 03/12/23 19:50
     add enemies with set paths - added to list: 3/12/23
     add music - added to list: 3/12/23
     win screen - added to list: 3/12/23 - DONE 03/12/23 21:19
-    death screen / animation - added to list: 3/12/23
+    death screen / animation - added to list: 3/12/23 - DONE 05/12/23 20:33
     levels screen - added to list: 3/12/23
     store multiple levels - added to list: 3/12/23 - DONE 03/12/23 21:16
 
     ---- bug fixes ----
-    fix collision issues
-    moving while paused
-    no collisions if fps drop
+    fix collision issues - added 3/12/23
+    moving while paused - added to list 3/12/23 - DONE 04/12/23 21:18
+    no collisions if fps drop - added to list 3/12/23 - DONE 04/12/23 21:18
+    move WAY too fast if fps drop - added to list 3/12/23 - DONE 05/12/23 17:06
+    no collisions in negative coordinates - added to list 05/12/23
+    textures in level editor going outside box boundaries - added to list 05/12/23 - DONE 05/12/23 21:18
+    placing textures behind top bar while top bar still visible - added to list 05/12/23
      */
 
     public static void main(String[] args) throws IOException {
@@ -58,8 +63,9 @@ public class Main{
         Display.DrawDisplay();
     }
 
-    public static String maptoload = "hello.cfg";
-    public static String[] textures = {"dirt", "grass", "lavabrick"};
+    public static String maptoload = "1-1.map";
+    public static String backgroundpic = "lavabackground.png";
+    public static String[] textures = {"dirt", "grass", "sand", "poison", "lavabrick", "coal", "lava", "smoke", "flagpole", "base", "circle", "triangle", "square", "brick", "bluebrick", "whitebrick", "purplebrick", "redbrick", "brownbrick"};
 
 
     public static String scoliosis = System.getenv("APPDATA") + "\\scoliosis";
@@ -135,10 +141,10 @@ public class Main{
         ClassLoader classLoader = Main.class.getClassLoader();
         InputStream inputStream = classLoader.getResourceAsStream(filename);
 
-        if (!Files.exists(Paths.get(System.getenv("APPDATA") + "\\scoliosis\\2dBallGame\\resources\\"+filename))) {
-            if (inputStream != null)
-                Files.copy(inputStream, Paths.get(System.getenv("APPDATA") + "\\scoliosis\\2dBallGame\\resources\\"+filename));
-        }
+        if (filename == "files.txt") Files.delete(Paths.get(System.getenv("APPDATA") + "\\scoliosis\\2dBallGame\\resources\\" + filename));
+
+        if (!Files.exists(Paths.get(System.getenv("APPDATA") + "\\scoliosis\\2dBallGame\\resources\\"+filename)))
+        if (inputStream != null) Files.copy(inputStream, Paths.get(System.getenv("APPDATA") + "\\scoliosis\\2dBallGame\\resources\\"+filename));
     }
 
 }

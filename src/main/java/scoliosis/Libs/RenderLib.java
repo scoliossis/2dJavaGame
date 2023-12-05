@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import static scoliosis.Display.*;
 import static scoliosis.Main.resourcesFile;
+import static scoliosis.Main.textures;
 
 public class RenderLib {
 
@@ -238,19 +239,26 @@ public class RenderLib {
     }
 
 
+    static BufferedImage[] currentimage = new BufferedImage[textures.length];
 
-    public static void drawImage(int x, int y, int width, int height, String path, Graphics g) {
+    static {
+        try {
+            for (int i = 0; i < textures.length; i++) {
+                currentimage[i] = ImageIO.read(new File(resourcesFile + "/"+textures[i]+".png"));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public static void drawImage(int x, int y, int width, int height, int imagenum, Graphics g) {
         x = (int) (x/480f *(float) (mainframe.getWidth()));
         y = (int) (y/270f *(float) (mainframe.getHeight()));
 
         height =  (int) (height/270f *(float) (mainframe.getHeight())) + 1;
         width = (int) (width/480f *(float) (mainframe.getWidth())) + 1;
-        try {
-            BufferedImage image = ImageIO.read(new File(resourcesFile + "/" + path + ".png"));
 
-            g.drawImage(image, x, y, width, height, null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        g.drawImage(currentimage[imagenum], x, y, width, height, null);
     }
 }

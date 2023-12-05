@@ -11,17 +11,19 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 
 import static scoliosis.GameLibs.MoveLib.*;
 import static scoliosis.GameLibs.Velocity.*;
 import static scoliosis.Libs.ScreenLib.height;
-import static scoliosis.Main.resourcesFile;
-import static scoliosis.Main.textures;
+import static scoliosis.Main.*;
 import static scoliosis.Menus.LevelEditor.testing;
 
 
@@ -34,12 +36,6 @@ public class Game {
 
     public static String levelreader = "";
     public static String[] levelreaderSplit = "".split(",");
-
-    /*
-    public static String[] textboxes = new String[]{
-            "space", "shift + w"
-    };
-     */
 
     public static double fps = 0;
     static double timebeforetick = 0;
@@ -62,6 +58,11 @@ public class Game {
 
     public static double fastesttime = 0d;
 
+    static boolean wrotefile = false;
+
+    public static boolean respawning = true;
+    public static boolean findfinish = true;
+
     public static void game(BufferedImage bi, BufferStrategy bs) throws IOException {
         ticks++;
         if (ticks == 1) {
@@ -70,7 +71,7 @@ public class Game {
 
         if (bs != null) {
             Graphics g = bs.getDrawGraphics();
-            BufferedImage image = ImageIO.read(new File(resourcesFile + "/background.png"));
+            BufferedImage image = ImageIO.read(new File(resourcesFile + "/"+backgroundpic));
             g.drawImage(image, 0, 0, ScreenLib.width, ScreenLib.height, null);
 
             if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
@@ -121,6 +122,27 @@ public class Game {
 
             //g.drawImage(bi, 0, 0, ScreenLib.width, ScreenLib.height, null);
 
+            if (respawning) {
+                if (findfinish) {
+                    findfinish = false;
+                    for (int i = 0; i < levelreaderSplit.length; i += 6) {
+                        if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) {
+                            fakex = Integer.parseInt(levelreaderSplit[i]);
+                            i = levelreaderSplit.length;
+                        }
+                    }
+                }
+
+                xcoordinate = spawnx;
+                ycoordinate = spawny;
+                xvelocity = 0;
+                yvelocity = 0;
+                win = false;
+                ticks = 0;
+
+                if (fakex - xcoordinate < 100) respawning = false;
+            }
+
             if (xcoordinate != fakex) {
                 if (xvelocity > 0) {
                     if (xcoordinate != 100) fakex += (xcoordinate - fakex) * 0.1f;
@@ -141,14 +163,12 @@ public class Game {
             int texnum = 0;
 
             for (int i = 0; i < levelreaderSplit.length; i+=6) {
-                if (Integer.parseInt(levelreaderSplit[i+5]) != 0) {
+                if (Integer.parseInt(levelreaderSplit[i+5]) == 1) {
                     xtodraw = Integer.parseInt(levelreaderSplit[i]) - fakefakex + 75;
-                    RenderLib.drawRect(xtodraw, Integer.parseInt(levelreaderSplit[i+1]), Integer.parseInt(levelreaderSplit[i+2]), Integer.parseInt(levelreaderSplit[i+3]), new Color(Integer.parseInt(levelreaderSplit[i+4])), g);
-
-                    if (Integer.parseInt(levelreaderSplit[i+5]) == 2) {
-                        //RenderLib.drawCenteredString(g, textboxes[texnum], xtodraw + ((Integer.parseInt(levelreaderSplit[i+2]))/2), Integer.parseInt(levelreaderSplit[i+1])+((Integer.parseInt(levelreaderSplit[i+3]))/2), 15, "Comic Sans MS", 0, new Color(255, 255, 255));
-                        texnum++;
+                    if (xtodraw <= 480 && xtodraw + Integer.parseInt(levelreaderSplit[i+2])  >= 0) {
+                        RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), Integer.parseInt(levelreaderSplit[i + 4]), g);
                     }
+
                 }
             }
 
@@ -158,24 +178,64 @@ public class Game {
             RenderLib.drawString(g, "fps: " + Math.round(fps), 380, 30, 10, "Comic Sans MS", 0, new Color(0,0,0));
 
             for (int i = 0; i < levelreaderSplit.length; i+=6) {
-                if (Integer.parseInt(levelreaderSplit[i+5]) == 0) {
+                if (Integer.parseInt(levelreaderSplit[i+5]) != 1) {
                     xtodraw = Integer.parseInt(levelreaderSplit[i]) - fakefakex + 75;
-                    RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i+1]), Integer.parseInt(levelreaderSplit[i+2]), Integer.parseInt(levelreaderSplit[i+3]), textures[Integer.parseInt(levelreaderSplit[i+4])], g);
+                    if (xtodraw <= 480 && xtodraw + Integer.parseInt(levelreaderSplit[i+2])  >= 0) {
+                        RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), Integer.parseInt(levelreaderSplit[i + 4]), g);
+                    }
                 }
             }
             if (win) {
                 time = System.currentTimeMillis();
                 xvelocity = 0;
-                if (fastesttime == 0d || timespent <fastesttime) fastesttime = timespent;
+                if (!wrotefile) {
+                    wrotefile = true;
+
+                    String readfile;
+                    String whattowrite = maptoload + ":" + timespent + ",";
+
+                    if (Files.exists(Paths.get(resourcesFile + "/times.scolio"))) {
+                        readfile = Files.readAllLines(Paths.get(resourcesFile + "/times.scolio")).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
+                        if (readfile.contains(maptoload)) {
+                            String[] splittext = readfile.split(",");
+                            for (int i = 0; i < splittext.length; i++) {
+                                if (splittext[i].contains(maptoload + ":")) {
+
+                                    if (Float.parseFloat(splittext[i].split(":")[1]) > timespent) {
+                                        System.out.println("previous record: " + Double.parseDouble(splittext[i].split(":")[1]));
+                                        whattowrite = readfile.replace(splittext[i] + ",", "") + maptoload + ":" + timespent + ",";
+                                        fastesttime = timespent;
+                                    }
+                                    else {
+                                        whattowrite = readfile;
+                                        fastesttime = Double.parseDouble(splittext[i].split(":")[1]);
+                                    }
+
+                                    i = splittext.length;
+                                }
+                            }
+                        } else {
+                            System.out.println("first time completing map!");
+                            whattowrite = readfile + whattowrite;
+                        }
+                    }
+
+                    BufferedWriter writer = new BufferedWriter(new FileWriter(resourcesFile + "/times.scolio"));
+                    writer.write(whattowrite);
+                    writer.close();
+                }
+
+
                 RenderLib.drawCenteredString(g, "gg! completed in " + timespent, 230, 130, 30, "Comic Sans MS", 0, new Color(0, 0, 0));
                 RenderLib.drawCenteredString(g, "personal best: " + fastesttime + (fastesttime == timespent ? "(NEW PB)" : ""), 230, 170, 30, "Comic Sans MS", 1, new Color(227, 0, 174, 255));
 
             }
             else {
                 timespent = ((System.currentTimeMillis() - time) / 1000);
+                wrotefile = false;
             }
 
-            RenderLib.drawString(g, new DecimalFormat("#.###").format(timespent), 5, 20, 13, "Comic Sans MS", 0, new Color(52, 28, 54));
+            RenderLib.drawString(g, new DecimalFormat("#.###").format(timespent), 5, 20, 13, "Comic Sans MS", 0, new Color(0, 0, 0));
 
 
             g.dispose();
@@ -192,6 +252,7 @@ public class Game {
         yvelocity = 0;
         win = false;
         ticks = 0;
+        respawning = true;
 
         if (testing) {
             ScreenLib.changeScreen("leveleditor");
@@ -203,6 +264,7 @@ public class Game {
 
     public static void win() {
         win = true;
+        findfinish = true;
     }
 
     public static boolean mapworking = true;
@@ -213,6 +275,7 @@ public class Game {
                 if (!levelreader.isEmpty()) {
                     mapworking = true;
                     Game.levelreaderSplit = levelreader.split(",");
+                    LevelEditor.Locations.clear();
                     for (int p = 0; p < Game.levelreaderSplit.length; p++) {
                         LevelEditor.Locations.add(Integer.parseInt(Game.levelreaderSplit[p]));
                     }
