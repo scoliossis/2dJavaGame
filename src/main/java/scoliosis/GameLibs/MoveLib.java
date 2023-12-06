@@ -128,6 +128,9 @@ public class MoveLib {
                                     xcoordinate = (int) Integer.parseInt(levelreaderSplit[i]);
                                     if (charecterheight > Integer.parseInt(levelreaderSplit[i + 3])) yvelocity += 2f;
                                     xvelocity *= -1.3f;
+
+                                    if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) win();
+
                                 }
 
                                 // check other side of wall
@@ -135,6 +138,8 @@ public class MoveLib {
                                     xcoordinate = (int) (Integer.parseInt(levelreaderSplit[i]) + Integer.parseInt(levelreaderSplit[i + 2]));
                                     if (charecterheight > Integer.parseInt(levelreaderSplit[i + 3])) yvelocity += 2f;
                                     xvelocity *= -1.3f;
+                                    if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) win();
+
 
                                 }
                             }

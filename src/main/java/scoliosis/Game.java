@@ -63,185 +63,192 @@ public class Game {
     public static boolean respawning = true;
     public static boolean findfinish = true;
 
+    static double leftovertime = 0;
+    static double timelast = System.currentTimeMillis();
+
+    static int fpslockmax = 5;
+
+
     public static void game(BufferedImage bi, BufferStrategy bs) throws IOException {
-        ticks++;
-        if (ticks == 1) {
-            time = System.currentTimeMillis();
-        }
 
-        if (bs != null) {
-            Graphics g = bs.getDrawGraphics();
-            BufferedImage image = ImageIO.read(new File(resourcesFile + "/"+backgroundpic));
-            g.drawImage(image, 0, 0, ScreenLib.width, ScreenLib.height, null);
+        timebeforetick = System.nanoTime();
 
-            if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
-                if (!testing) ScreenLib.changeScreen("pause");
-                else ScreenLib.changeScreen("leveleditor");
-            }
+        double millisbetweentick = timebeforetick - timeaftertick;
+
+        timeaftertick = System.nanoTime();
 
 
-            colorofball = new Color(105, 105, 252);
-            outsidering = new Color(0, 0, 0);
-            if (sprinting) {
-                colorofball = new Color(18, 166, 255);
-                outsidering = new Color(255, 255, 255);
-            }
-
-
-            // CHECKING IF DIED
-            if (ycoordinate > 270 || KeyLib.keyPressed(KeyEvent.VK_R)) {
-                KillPlayer();
-            }
-
-            if (yvelocity < -2) {
-                charecterheight = 20;
-            }
-            else if (yvelocity > 2) {
-                charecterheight = 30;
-            }
-            else if (sprinting && !onGround) {
-                charecterheight = 23;
-            }
-
-            else {
-                charecterheight = 25;
-            }
-
-            timebeforetick = System.nanoTime();
-
-            double millisbetweentick = timebeforetick - timeaftertick;
-
-            timeaftertick = System.nanoTime();
-
-
-            // so it doesnt check too often.
-            if (System.currentTimeMillis() % 75 == 0)
+        // so it doesnt check too often.
+        if (System.currentTimeMillis() % 75 == 0)
 
             // gets the amount of seconds between each frame, then divide 1 by it.
-                fps = 1 / (millisbetweentick / 1000000000);
+            fps = 1 / (millisbetweentick / 1000000000);
 
-            //g.drawImage(bi, 0, 0, ScreenLib.width, ScreenLib.height, null);
 
-            if (respawning) {
-                if (findfinish) {
-                    findfinish = false;
-                    for (int i = 0; i < levelreaderSplit.length; i += 6) {
-                        if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) {
-                            fakex = Integer.parseInt(levelreaderSplit[i]);
-                            i = levelreaderSplit.length;
-                        }
-                    }
-                }
 
-                xcoordinate = spawnx;
-                ycoordinate = spawny;
-                xvelocity = 0;
-                yvelocity = 0;
-                win = false;
-                ticks = 0;
+        leftovertime = (System.currentTimeMillis() - timelast) - fpslockmax;
 
-                if (fakex - xcoordinate < 100) respawning = false;
-            }
-
-            if (xcoordinate != fakex) {
-                if (xvelocity > 0) {
-                    if (xcoordinate != 100) fakex += (xcoordinate - fakex) * 0.1f;
-                    else fakex -= 0.1f;
-                }
-                else if (xvelocity < 0) {
-                    if (xcoordinate != 200) fakex += (xcoordinate - fakex) * 0.1f;
-                    else fakex += 0.1f;
-
-                }
-                else {
-                    fakex += (xcoordinate - fakex) * 0.01f;
-                }
-
-            }
-
-            int fakefakex = (int) fakex;
-            int texnum = 0;
-
-            for (int i = 0; i < levelreaderSplit.length; i+=6) {
-                if (Integer.parseInt(levelreaderSplit[i+5]) == 1) {
-                    xtodraw = Integer.parseInt(levelreaderSplit[i]) - fakefakex + 75;
-                    if (xtodraw <= 480 && xtodraw + Integer.parseInt(levelreaderSplit[i+2])  >= 0) {
-                        RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), Integer.parseInt(levelreaderSplit[i + 4]), g);
-                    }
-
-                }
-            }
-
-            RenderLib.drawCircle(75 + (xcoordinate - fakefakex), ycoordinate-25, charecterwidth, charecterheight, colorofball, g);
-            RenderLib.drawCircleOutline(75 + (xcoordinate - fakefakex), ycoordinate-25, charecterwidth, charecterheight, outsidering, g);
-
-            RenderLib.drawString(g, "fps: " + Math.round(fps), 380, 30, 10, "Comic Sans MS", 0, new Color(0,0,0));
-
-            for (int i = 0; i < levelreaderSplit.length; i+=6) {
-                if (Integer.parseInt(levelreaderSplit[i+5]) != 1) {
-                    xtodraw = Integer.parseInt(levelreaderSplit[i]) - fakefakex + 75;
-                    if (xtodraw <= 480 && xtodraw + Integer.parseInt(levelreaderSplit[i+2])  >= 0) {
-                        RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), Integer.parseInt(levelreaderSplit[i + 4]), g);
-                    }
-                }
-            }
-            if (win) {
+        while (leftovertime >= fpslockmax) {
+            leftovertime -= fpslockmax;
+            ticks++;
+            if (ticks == 1) {
                 time = System.currentTimeMillis();
-                xvelocity = 0;
-                if (!wrotefile) {
-                    wrotefile = true;
+            }
 
-                    String readfile;
-                    String whattowrite = maptoload + ":" + timespent + ",";
+            if (bs != null) {
+                Graphics g = bs.getDrawGraphics();
+                BufferedImage image = ImageIO.read(new File(resourcesFile + "/" + backgroundpic));
+                g.drawImage(image, 0, 0, ScreenLib.width, ScreenLib.height, null);
 
-                    if (Files.exists(Paths.get(resourcesFile + "/times.scolio"))) {
-                        readfile = Files.readAllLines(Paths.get(resourcesFile + "/times.scolio")).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
-                        if (readfile.contains(maptoload)) {
-                            String[] splittext = readfile.split(",");
-                            for (int i = 0; i < splittext.length; i++) {
-                                if (splittext[i].contains(maptoload + ":")) {
-
-                                    if (Float.parseFloat(splittext[i].split(":")[1]) > timespent) {
-                                        System.out.println("previous record: " + Double.parseDouble(splittext[i].split(":")[1]));
-                                        whattowrite = readfile.replace(splittext[i] + ",", "") + maptoload + ":" + timespent + ",";
-                                        fastesttime = timespent;
-                                    }
-                                    else {
-                                        whattowrite = readfile;
-                                        fastesttime = Double.parseDouble(splittext[i].split(":")[1]);
-                                    }
-
-                                    i = splittext.length;
-                                }
-                            }
-                        } else {
-                            System.out.println("first time completing map!");
-                            whattowrite = readfile + whattowrite;
-                        }
-                    }
-
-                    BufferedWriter writer = new BufferedWriter(new FileWriter(resourcesFile + "/times.scolio"));
-                    writer.write(whattowrite);
-                    writer.close();
+                if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
+                    if (!testing) ScreenLib.changeScreen("pause");
+                    else ScreenLib.changeScreen("leveleditor");
                 }
 
 
-                RenderLib.drawCenteredString(g, "gg! completed in " + timespent, 230, 130, 30, "Comic Sans MS", 0, new Color(0, 0, 0));
-                RenderLib.drawCenteredString(g, "personal best: " + fastesttime + (fastesttime == timespent ? "(NEW PB)" : ""), 230, 170, 30, "Comic Sans MS", 1, new Color(227, 0, 174, 255));
+                colorofball = new Color(105, 105, 252);
+                outsidering = new Color(0, 0, 0);
+                if (sprinting) {
+                    colorofball = new Color(18, 166, 255);
+                    outsidering = new Color(255, 255, 255);
+                }
 
+
+                // CHECKING IF DIED
+                if (ycoordinate > 270 || KeyLib.keyPressed(KeyEvent.VK_R)) {
+                    KillPlayer();
+                }
+
+                if (yvelocity < -2) {
+                    charecterheight = 20;
+                } else if (yvelocity > 2) {
+                    charecterheight = 30;
+                } else if (sprinting && !onGround) {
+                    charecterheight = 23;
+                } else {
+                    charecterheight = 25;
+                }
+
+                //g.drawImage(bi, 0, 0, ScreenLib.width, ScreenLib.height, null);
+
+                if (respawning) {
+                    if (findfinish) {
+                        findfinish = false;
+                        for (int i = 0; i < levelreaderSplit.length; i += 6) {
+                            if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) {
+                                fakex = Integer.parseInt(levelreaderSplit[i]);
+                                i = levelreaderSplit.length;
+                            }
+                        }
+                    }
+
+                    xcoordinate = spawnx;
+                    ycoordinate = spawny;
+                    xvelocity = 0;
+                    yvelocity = 0;
+                    win = false;
+                    ticks = 0;
+
+                    if (fakex - xcoordinate < 100) respawning = false;
+                }
+
+                if (xcoordinate != fakex) {
+                    if (xvelocity > 0) {
+                        if (xcoordinate != 100) fakex += (xcoordinate - fakex) * 0.1f;
+                        else fakex -= 0.1f;
+                    } else if (xvelocity < 0) {
+                        if (xcoordinate != 200) fakex += (xcoordinate - fakex) * 0.1f;
+                        else fakex += 0.1f;
+
+                    } else {
+                        fakex += (xcoordinate - fakex) * 0.05f;
+                    }
+
+                }
+
+                int fakefakex = (int) fakex;
+                int texnum = 0;
+
+                for (int i = 0; i < levelreaderSplit.length; i += 6) {
+                    if (Integer.parseInt(levelreaderSplit[i + 5]) == 1) {
+                        xtodraw = Integer.parseInt(levelreaderSplit[i]) - fakefakex + 75;
+                        if (xtodraw <= 480 && xtodraw + Integer.parseInt(levelreaderSplit[i + 2]) >= 0) {
+                            RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), Integer.parseInt(levelreaderSplit[i + 4]), g);
+                        }
+
+                    }
+                }
+
+                RenderLib.drawCircle(75 + (xcoordinate - fakefakex), ycoordinate - 25, charecterwidth, charecterheight, colorofball, g);
+                RenderLib.drawCircleOutline(75 + (xcoordinate - fakefakex), ycoordinate - 25, charecterwidth, charecterheight, outsidering, g);
+
+                RenderLib.drawString(g, "fps: " + Math.round(fps), 380, 30, 10, "Comic Sans MS", 0, new Color(0, 0, 0));
+
+                for (int i = 0; i < levelreaderSplit.length; i += 6) {
+                    if (Integer.parseInt(levelreaderSplit[i + 5]) != 1) {
+                        xtodraw = Integer.parseInt(levelreaderSplit[i]) - fakefakex + 75;
+                        if (xtodraw <= 480 && xtodraw + Integer.parseInt(levelreaderSplit[i + 2]) >= 0) {
+                            RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), Integer.parseInt(levelreaderSplit[i + 4]), g);
+                        }
+                    }
+                }
+                if (win) {
+                    time = System.currentTimeMillis();
+                    xvelocity = 0;
+                    if (!wrotefile) {
+                        wrotefile = true;
+
+                        String readfile;
+                        String whattowrite = maptoload + ":" + timespent + ",";
+
+                        if (Files.exists(Paths.get(resourcesFile + "/times.scolio"))) {
+                            readfile = Files.readAllLines(Paths.get(resourcesFile + "/times.scolio")).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
+                            if (readfile.contains(maptoload)) {
+                                String[] splittext = readfile.split(",");
+                                for (int i = 0; i < splittext.length; i++) {
+                                    if (splittext[i].contains(maptoload + ":")) {
+
+                                        if (Float.parseFloat(splittext[i].split(":")[1]) > timespent) {
+                                            System.out.println("previous record: " + Double.parseDouble(splittext[i].split(":")[1]));
+                                            whattowrite = readfile.replace(splittext[i] + ",", "") + maptoload + ":" + timespent + ",";
+                                            fastesttime = timespent;
+                                        } else {
+                                            whattowrite = readfile;
+                                            fastesttime = Double.parseDouble(splittext[i].split(":")[1]);
+                                        }
+
+                                        i = splittext.length;
+                                    }
+                                }
+                            } else {
+                                System.out.println("first time completing map!");
+                                whattowrite = readfile + whattowrite;
+                            }
+                        }
+
+                        BufferedWriter writer = new BufferedWriter(new FileWriter(resourcesFile + "/times.scolio"));
+                        writer.write(whattowrite);
+                        writer.close();
+                    }
+
+
+                    RenderLib.drawCenteredString(g, "gg! completed in " + timespent, 230, 130, 30, "Comic Sans MS", 0, new Color(0, 0, 0));
+                    RenderLib.drawCenteredString(g, "personal best: " + fastesttime + (fastesttime == timespent ? "(NEW PB)" : ""), 230, 170, 30, "Comic Sans MS", 1, new Color(227, 0, 174, 255));
+
+                } else {
+                    timespent = ((System.currentTimeMillis() - time) / 1000);
+                    wrotefile = false;
+                }
+
+                RenderLib.drawString(g, new DecimalFormat("#.###").format(timespent), 5, 20, 13, "Comic Sans MS", 0, new Color(0, 0, 0));
+
+
+                g.dispose();
+                bs.show();
+                timelast = System.currentTimeMillis();
+
+                MoveLib.MoveLibChecks();
             }
-            else {
-                timespent = ((System.currentTimeMillis() - time) / 1000);
-                wrotefile = false;
-            }
-
-            RenderLib.drawString(g, new DecimalFormat("#.###").format(timespent), 5, 20, 13, "Comic Sans MS", 0, new Color(0, 0, 0));
-
-
-            g.dispose();
-            bs.show();
-
-            MoveLib.MoveLibChecks();
         }
     }
 
