@@ -80,8 +80,10 @@ public class MoveLib {
                                         yvelocity += 2f;
                                     }
 
-                                    if (Integer.parseInt(levelreaderSplit[i + 5]) == 3) KillPlayer();
-
+                                    if (Integer.parseInt(levelreaderSplit[i + 5]) == 3) {
+                                        KillPlayer();
+                                        return;
+                                    }
                                     if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) win();
 
                                 }
@@ -93,7 +95,10 @@ public class MoveLib {
                                     onGround = true;
                                     sprintedInAir = false;
 
-                                    if (Integer.parseInt(levelreaderSplit[i + 5]) == 3) KillPlayer();
+                                    if (Integer.parseInt(levelreaderSplit[i + 5]) == 3) {
+                                        KillPlayer();
+                                        return;
+                                    }
                                     if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) win();
 
                                 }
@@ -102,7 +107,10 @@ public class MoveLib {
                                 if (Integer.parseInt(levelreaderSplit[i + 1]) + Integer.parseInt(levelreaderSplit[i + 3]) <= ycoordinate && Integer.parseInt(levelreaderSplit[i + 1]) + Integer.parseInt(levelreaderSplit[i + 3]) >= ycoordinate - yvelocity && !onWall && !onGround) {
                                     yvelocity *= -2f;
 
-                                    if (Integer.parseInt(levelreaderSplit[i + 5]) == 3) KillPlayer();
+                                    if (Integer.parseInt(levelreaderSplit[i + 5]) == 3) {
+                                        KillPlayer();
+                                        return;
+                                    }
                                     if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) win();
 
                                 }
@@ -113,7 +121,10 @@ public class MoveLib {
                                     yvelocity = 2f;
                                     doyVelocity = false;
 
-                                    if (Integer.parseInt(levelreaderSplit[i + 5]) == 3) KillPlayer();
+                                    if (Integer.parseInt(levelreaderSplit[i + 5]) == 3) {
+                                        KillPlayer();
+                                        return;
+                                    }
                                     if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) win();
                                 }
 
@@ -139,8 +150,6 @@ public class MoveLib {
                                     if (charecterheight > Integer.parseInt(levelreaderSplit[i + 3])) yvelocity += 2f;
                                     xvelocity *= -1.3f;
                                     if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) win();
-
-
                                 }
                             }
                         }

@@ -10,10 +10,7 @@ import java.awt.Canvas;
 
 import scoliosis.Libs.KeyLib;
 import scoliosis.Libs.ScreenLib;
-import scoliosis.Menus.LevelEditor;
-import scoliosis.Menus.OptionsScreen;
-import scoliosis.Menus.PauseMenu;
-import scoliosis.Menus.TitleScreen;
+import scoliosis.Menus.*;
 
 import static scoliosis.Libs.ScreenLib.screenSize;
 
@@ -32,6 +29,7 @@ public class Display extends Canvas {
     public static boolean ingame = false;
     public static boolean pausescreen = false;
     public static boolean leveleditor = false;
+    public static boolean chooselevel = false;
 
     public void startGame() {
 
@@ -53,6 +51,7 @@ public class Display extends Canvas {
                 else if (titlescreen) TitleScreen.titleScreen(bi, bs);
                 else if (optionsmenu) OptionsScreen.optionsMenu(bi, bs);
                 else if (leveleditor) LevelEditor.LevelEditor(bi, bs);
+                else if (chooselevel) ChooseLevel.LevelSelector(bi, bs);
 
             } catch (Exception e) {
                 System.out.println(e);

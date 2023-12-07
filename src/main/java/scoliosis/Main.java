@@ -46,13 +46,13 @@ public class Main{
     store multiple levels - added to list: 3/12/23 - DONE 03/12/23 21:16
 
     ---- bug fixes ----
-    fix collision issues - added 3/12/23
+    fix collision issues - added 3/12/23 - is a feature for now :sunglasses:
     moving while paused - added to list 3/12/23 - DONE 04/12/23 21:18
     no collisions if fps drop - added to list 3/12/23 - DONE 04/12/23 21:18
     move WAY too fast if fps drop - added to list 3/12/23 - DONE 05/12/23 17:06
-    no collisions in negative coordinates - added to list 05/12/23
+    no collisions in negative coordinates - added to list 05/12/23 - may not fix as is slightly useless...
     textures in level editor going outside box boundaries - added to list 05/12/23 - DONE 05/12/23 21:18
-    placing textures behind top bar while top bar still visible - added to list 05/12/23
+    placing textures behind top bar while top bar still visible - added to list 05/12/23 - DONE 07/12/23 0:15
      */
 
     public static void main(String[] args) throws IOException {
@@ -64,7 +64,8 @@ public class Main{
     }
 
     public static String maptoload = "1-1.map";
-    public static String backgroundpic = "lavabackground.png";
+    public static String[] backgrounds = {"background", "mushroombackground", "cavebackground", "desertbackground", "skybackground", "swampbackground", "rainbackground", "lavabackground"};
+
     public static String[] textures = {"dirt", "grass", "sand", "poison", "lavabrick", "coal", "lava", "smoke", "flagpole", "base", "circle", "triangle", "square", "brick", "bluebrick", "whitebrick", "purplebrick", "redbrick", "brownbrick"};
 
 

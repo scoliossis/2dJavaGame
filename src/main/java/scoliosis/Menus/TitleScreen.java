@@ -39,8 +39,7 @@ public class TitleScreen {
 
                     if (leftclicked != MouseLib.leftclicked && MouseLib.leftclicked) {
                         if (i == 0) {
-                            if (mapworking) ScreenLib.changeScreen("game");
-                            else System.out.println("map not currently working! please try it in the editor");
+                            if (mapworking) ScreenLib.changeScreen("levels");
                         }
                         if (i == 1) {
                             ScreenLib.changeScreen("options");

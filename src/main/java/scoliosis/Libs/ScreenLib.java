@@ -9,6 +9,7 @@ import scoliosis.Menus.TitleScreen;
 import scoliosis.Options.Config;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -18,13 +19,16 @@ import static scoliosis.Display.mainframe;
 import static scoliosis.Display.pausescreen;
 import static scoliosis.Game.extratimer;
 import static scoliosis.Game.levelreader;
-import static scoliosis.Main.maptoload;
-import static scoliosis.Main.resourcesFile;
+import static scoliosis.Libs.RenderLib.background;
+import static scoliosis.Main.*;
+import static scoliosis.Menus.ChooseLevel.map;
 
 public class ScreenLib {
     public static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     public static int width = (int) screenSize.getWidth() / 4;
     public static int height = (int) screenSize.getHeight() / 4;
+
+    public static BufferedImage[] blackgrounds = new BufferedImage[3];
 
 
     public static int getXcoord() {
@@ -57,6 +61,18 @@ public class ScreenLib {
         }
         else Game.ticks = 0;
 
+        if (screenname == "levels") {
+            int length = background.length-2; // the last 2 backgrounds do not match the others and look out of place
+            int randonum = ((int) (Math.random() * length));
+            int randonum2 = (randonum+1 >= length ? randonum+1-length : randonum+1);
+            int randonum3 = ((randonum+2 >= length ? randonum+2-length : randonum+2));
+
+            blackgrounds[0] = RenderLib.splitBufferedImage(0, 0, background[randonum].getWidth()/3, background[randonum].getHeight(), background[randonum]);
+            blackgrounds[1] = RenderLib.splitBufferedImage(background[randonum2].getWidth()-320, 0, background[randonum2].getWidth()/3, background[randonum2].getHeight(), background[randonum2]);
+            blackgrounds[2] = RenderLib.splitBufferedImage(background[randonum3].getWidth()-160, 0, background[randonum3].getWidth()/3, background[randonum3].getHeight(), background[randonum3]);
+
+        }
+
         if (Display.leveleditor) {
             if (Files.exists(Paths.get(resourcesFile + "/"+maptoload))) {
                 try {
@@ -79,17 +95,18 @@ public class ScreenLib {
         Display.ingame = false;
         Display.pausescreen = false;
         Display.leveleditor = false;
+        Display.chooselevel = false;
 
         MouseLib.leftclicked = false;
 
         if (screenname == "title") Display.titlescreen = true;
+        else if (screenname == "levels") Display.chooselevel = true;
         else if (screenname == "options") {
             Config.load();
 
             Display.optionsmenu = true;
         }
         else if (screenname == "game") {
-            Game.loadMap(maptoload);
 
             TitleScreen.sillytime = System.currentTimeMillis();
 

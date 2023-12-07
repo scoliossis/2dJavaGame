@@ -23,6 +23,7 @@ import static scoliosis.Game.charecterwidth;
 import static scoliosis.GameLibs.MoveLib.*;
 import static scoliosis.GameLibs.Velocity.*;
 import static scoliosis.Libs.MouseLib.*;
+import static scoliosis.Libs.RenderLib.background;
 import static scoliosis.Main.*;
 
 public class LevelEditor {
@@ -69,8 +70,7 @@ public class LevelEditor {
             if (bs != null) {
 
                 Graphics g = bs.getDrawGraphics();
-                BufferedImage image = ImageIO.read(new File(resourcesFile + "/" + backgroundpic));
-                g.drawImage(image, 0, 0, ScreenLib.width, ScreenLib.height, null);
+                g.drawImage(background[0], 0, 0, ScreenLib.width, ScreenLib.height, null);
 
                 if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
                     if (askreset) askreset = false;

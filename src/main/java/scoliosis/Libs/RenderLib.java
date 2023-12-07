@@ -9,8 +9,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static scoliosis.Display.*;
-import static scoliosis.Main.resourcesFile;
-import static scoliosis.Main.textures;
+import static scoliosis.Main.*;
 
 public class RenderLib {
 
@@ -239,6 +238,8 @@ public class RenderLib {
     }
 
 
+    public static BufferedImage[] background = new BufferedImage[backgrounds.length];
+
     static BufferedImage[] currentimage = new BufferedImage[textures.length];
 
     static {
@@ -246,11 +247,23 @@ public class RenderLib {
             for (int i = 0; i < textures.length; i++) {
                 currentimage[i] = ImageIO.read(new File(resourcesFile + "/"+textures[i]+".png"));
             }
+            for (int i = 0; i < backgrounds.length; i++) {
+                background[i] = ImageIO.read(new File(resourcesFile + "/" + backgrounds[i] + ".png"));
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    public static void drawImage(int x, int y, int width, int height, BufferedImage bi, Graphics g) {
+        x = (int) (x/480f *(float) (mainframe.getWidth()));
+        y = (int) (y/270f *(float) (mainframe.getHeight()));
+
+        height =  (int) (height/270f *(float) (mainframe.getHeight())) + 1;
+        width = (int) (width/480f *(float) (mainframe.getWidth())) + 1;
+
+        g.drawImage(bi, x, y, width, height, null);
+    }
 
     public static void drawImage(int x, int y, int width, int height, int imagenum, Graphics g) {
         x = (int) (x/480f *(float) (mainframe.getWidth()));
@@ -260,5 +273,15 @@ public class RenderLib {
         width = (int) (width/480f *(float) (mainframe.getWidth())) + 1;
 
         g.drawImage(currentimage[imagenum], x, y, width, height, null);
+    }
+
+    public static BufferedImage splitBufferedImage(int x, int y, int w, int h, BufferedImage image) {
+        BufferedImage image2 = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        for (int xc = 0; xc < w; xc++) {
+            for (int yc = 0; yc < h; yc++) {
+                image2.setRGB(xc,yc, image.getRGB(xc+x, yc+y));
+            }
+        }
+        return image2;
     }
 }
