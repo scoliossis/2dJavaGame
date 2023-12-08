@@ -7,6 +7,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Objects;
 
 import static scoliosis.Display.*;
 import static scoliosis.Main.*;
@@ -237,6 +240,9 @@ public class RenderLib {
 
     }
 
+    public static int numberOfImages = 0;
+    public static BufferedImage[] allimages;
+    public static String[] ImageNames;
 
     public static BufferedImage[] background = new BufferedImage[backgrounds.length];
 
@@ -250,6 +256,24 @@ public class RenderLib {
             for (int i = 0; i < backgrounds.length; i++) {
                 background[i] = ImageIO.read(new File(resourcesFile + "/" + backgrounds[i] + ".png"));
             }
+
+            for (File file : Objects.requireNonNull(Paths.get(resourcesFile).toFile().listFiles())) {
+                if (file.getName().endsWith(".png")) {
+                    numberOfImages++;
+                }
+            }
+            System.out.println(numberOfImages);
+            allimages = new BufferedImage[numberOfImages];
+            ImageNames = new String[numberOfImages];
+            int i = 0;
+            for (File file : Objects.requireNonNull(Paths.get(resourcesFile).toFile().listFiles())) {
+                if (file.getName().endsWith(".png")) {
+                    allimages[i] = ImageIO.read(new File(resourcesFile + "/" + file.getName()));
+                    ImageNames[i] = file.getName();
+                    i++;
+                }
+            }
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -282,6 +306,18 @@ public class RenderLib {
                 image2.setRGB(xc,yc, image.getRGB(xc+x, yc+y));
             }
         }
+        return image2;
+    }
+
+    public static BufferedImage getBufferedImage(String h) {
+        BufferedImage image2 = allimages[0];
+
+        for (int i = 0; i < numberOfImages; i++) {
+            if (ImageNames[i].replace(".png", "").replace(" ", "").equalsIgnoreCase(h)) {
+                image2 = allimages[i];
+            }
+        }
+
         return image2;
     }
 }

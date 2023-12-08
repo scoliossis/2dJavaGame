@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
+import static scoliosis.Libs.RenderLib.getBufferedImage;
 import static scoliosis.Libs.ScreenLib.blackgrounds;
 
 public class ChooseLevel {
@@ -27,44 +28,55 @@ public class ChooseLevel {
     public static boolean campaign = true;
 
     public static int map = 0;
+    public static boolean practisescreen = false;
 
     public static void LevelSelector(BufferedImage bi, BufferStrategy bs) {
 
         if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
-            ScreenLib.changeScreen("title");
+            if (practisescreen) practisescreen = false;
+            else ScreenLib.changeScreen("title");
         }
 
         if (bs != null) {
 
             Graphics g = bs.getDrawGraphics();
 
-            for (int i = 0; i < blackgrounds.length; i++) {
-                if (!MouseLib.isMouseOverCoords(i*160, 0, 160, 270)) {
-                    RenderLib.drawImage(i * 160, 0, 160, 270, blackgrounds[i], g);
-                    RenderLib.drawCenteredString(g, options[i], i*160+80, 150, 30, "Comic Sans MS", 1, new Color(255,255,255));
-                }
-            }
-            for (int i = 0; i < blackgrounds.length; i++) {
-                if (MouseLib.isMouseOverCoords(i*160, 0, 160, 270)) {
-                    RenderLib.drawImage(i*160 - 10, -10, 180, 290, blackgrounds[i], g);
-                    RenderLib.drawCenteredString(g, options[i], i*160+80, 150, 33, "Comic Sans MS", 1, new Color(255,255,255));
-
-                    if (MouseLib.leftclicked) {
-                        switch (i) {
-                            case 0:
-                                campaign = true;
-
-                                if (map == 0) {
-                                    Game.loadMap(sortedCampaignLevels[map]);
-                                    map++;
-                                }
-
-                        }
-                        Game.lives = 3;
-
-                        ScreenLib.changeScreen("game");
+            if (!practisescreen) {
+                for (int i = 0; i < blackgrounds.length; i++) {
+                    if (!MouseLib.isMouseOverCoords(i * 160, 0, 160, 270)) {
+                        RenderLib.drawImage(i * 160, 0, 160, 270, blackgrounds[i], g);
+                        RenderLib.drawCenteredString(g, options[i], i * 160 + 80, 150, 30, "Comic Sans MS", 1, new Color(255, 255, 255));
                     }
                 }
+                for (int i = 0; i < blackgrounds.length; i++) {
+                    if (MouseLib.isMouseOverCoords(i * 160, 0, 160, 270)) {
+                        RenderLib.drawImage(i * 160 - 10, -10, 180, 290, blackgrounds[i], g);
+                        RenderLib.drawCenteredString(g, options[i], i * 160 + 80, 150, 33, "Comic Sans MS", 1, new Color(255, 255, 255));
+
+                        if (MouseLib.leftclicked) {
+                            switch (i) {
+                                case 0:
+                                    campaign = true;
+
+                                    if (map == 0) {
+                                        Game.lives = 3;
+
+                                        Game.loadMap(sortedCampaignLevels[map]);
+                                        map++;
+                                    }
+                                    ScreenLib.changeScreen("game");
+
+
+                                case 1:
+                                    practisescreen = true;
+
+                            }
+                        }
+                    }
+                }
+            }
+            else if (practisescreen) {
+                RenderLib.drawImage(0,0,480, 270, getBufferedImage("fillerimage"), g);
             }
             g.dispose();
             bs.show();

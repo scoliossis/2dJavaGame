@@ -2,31 +2,22 @@ package scoliosis;
 
 import scoliosis.Libs.MouseLib;
 import scoliosis.Libs.SoundLib;
-import scoliosis.Menus.LevelEditor;
 
-import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.*;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
 
-import static scoliosis.Game.levelreader;
-
-public class Main{
+public class Main {
 
     /*
     todo: as of 03/12/23 13:00
     ---- level editor ----
     color picker - added to list: 3/12/23 - DONE 03/12/23 14:32
     show previous shit from practise - added to list: 3/12/23 - DONE 03/12/23 15:01
-    make gui to choose level - added to list: 3/12/23
+    make gui to choose level - added to list: 3/12/23 - DONE 07/12/23 22:05
     change spawn point - added to list: 3/12/23
     different blocks (lava, finish flag) - added to list: 3/12/23 - DONE 03/12/23 19:50
     custom block textures - added to list: 3/12/23 - DONE 04/12/23 20:32
@@ -37,6 +28,9 @@ public class Main{
         level 1-1 - 03/12/23 19:41
         level 8-1 - 05/12/23 8:20
 
+    make hard mode / hardcore - added to list: 7/12/23
+    make practise for campaign levels - added to list: 7/12/23
+    make special tab for custom levels - added to list: 7/12/23
     add timer - added to list: 3/12/23 - DONE 03/12/23 19:50
     add enemies with set paths - added to list: 3/12/23
     add music - added to list: 3/12/23
