@@ -4,6 +4,8 @@ import scoliosis.Display;
 import scoliosis.Game;
 import scoliosis.GameLibs.MoveLib;
 import scoliosis.GameLibs.Velocity;
+import scoliosis.Main;
+import scoliosis.Menus.ChooseLevel;
 import scoliosis.Menus.LevelEditor;
 import scoliosis.Menus.TitleScreen;
 import scoliosis.Options.Config;
@@ -17,8 +19,8 @@ import java.nio.file.Paths;
 
 import static scoliosis.Display.mainframe;
 import static scoliosis.Display.pausescreen;
-import static scoliosis.Game.extratimer;
-import static scoliosis.Game.levelreader;
+import static scoliosis.Game.*;
+import static scoliosis.Libs.RenderLib.BlurBufferedImage;
 import static scoliosis.Libs.RenderLib.background;
 import static scoliosis.Main.*;
 import static scoliosis.Menus.ChooseLevel.map;
@@ -67,18 +69,26 @@ public class ScreenLib {
             int randonum2 = (randonum+1 >= length ? randonum+1-length : randonum+1);
             int randonum3 = ((randonum+2 >= length ? randonum+2-length : randonum+2));
 
-            blackgrounds[0] = RenderLib.splitBufferedImage(0, 0, background[randonum].getWidth()/3, background[randonum].getHeight(), background[randonum]);
-            blackgrounds[1] = RenderLib.splitBufferedImage(background[randonum2].getWidth()-320, 0, background[randonum2].getWidth()/3, background[randonum2].getHeight(), background[randonum2]);
-            blackgrounds[2] = RenderLib.splitBufferedImage(background[randonum3].getWidth()-160, 0, background[randonum3].getWidth()/3, background[randonum3].getHeight(), background[randonum3]);
+            if (randonum + 1 > highestUnlockedWorld) blackgrounds[0] = BlurBufferedImage(RenderLib.splitBufferedImage(0, 0, background[randonum].getWidth()/3, background[randonum].getHeight(), background[randonum]));
+            else blackgrounds[0] = RenderLib.splitBufferedImage(0, 0, background[randonum].getWidth()/3, background[randonum].getHeight(), background[randonum]);
+            if (randonum2 + 1 > highestUnlockedWorld) blackgrounds[1] = BlurBufferedImage(RenderLib.splitBufferedImage(background[randonum2].getWidth()-320, 0, background[randonum2].getWidth()/3, background[randonum2].getHeight(), background[randonum2]));
+            else blackgrounds[1] = RenderLib.splitBufferedImage(background[randonum2].getWidth()-320, 0, background[randonum2].getWidth()/3, background[randonum2].getHeight(), background[randonum2]);
+            if (randonum3 + 1 > highestUnlockedWorld) blackgrounds[2] = BlurBufferedImage(RenderLib.splitBufferedImage(background[randonum3].getWidth()-160, 0, background[randonum3].getWidth()/3, background[randonum3].getHeight(), background[randonum3]));
+            else blackgrounds[2] = RenderLib.splitBufferedImage(background[randonum3].getWidth()-160, 0, background[randonum3].getWidth()/3, background[randonum3].getHeight(), background[randonum3]);
 
+            ChooseLevel.campaign = false;
+            ChooseLevel.practisescreen = false;
+            Display.leveleditor = false;
+
+            map = 0;
         }
 
         if (Display.leveleditor) {
-            if (Files.exists(Paths.get(resourcesFile + "/"+maptoload))) {
+            if (Files.exists(Paths.get(resourcesFile + "/"+lastLoadedMap))) {
                 try {
-                    Files.write(Paths.get(resourcesFile + "/"+maptoload), LevelEditor.Locations.toString().getBytes(StandardCharsets.UTF_8));
+                    Files.write(Paths.get(resourcesFile + "/"+lastLoadedMap), LevelEditor.Locations.toString().getBytes(StandardCharsets.UTF_8));
 
-                    levelreader = Files.readAllLines(Paths.get(resourcesFile + "/"+maptoload)).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
+                    levelreader = Files.readAllLines(Paths.get(resourcesFile + "/"+lastLoadedMap)).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
                     Game.levelreaderSplit = levelreader.split(",");
                 } catch (IOException e) {
                     throw new RuntimeException(e);

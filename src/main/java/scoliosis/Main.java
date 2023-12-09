@@ -52,12 +52,10 @@ public class Main {
     public static void main(String[] args) throws IOException {
         Toolkit.getDefaultToolkit().addAWTEventListener(new MouseLib(), AWTEvent.MOUSE_EVENT_MASK | AWTEvent.FOCUS_EVENT_MASK);
         loadresources();
-        Game.loadMap(maptoload);
 
         Display.DrawDisplay();
     }
 
-    public static String maptoload = "1-1.map";
     public static String[] backgrounds = {"background", "mushroombackground", "cavebackground", "desertbackground", "skybackground", "swampbackground", "rainbackground", "lavabackground"};
 
     public static String[] textures = {"dirt", "grass", "sand", "poison", "lavabrick", "coal", "lava", "smoke", "flagpole", "base", "circle", "triangle", "square", "brick", "bluebrick", "whitebrick", "purplebrick", "redbrick", "brownbrick"};
@@ -66,6 +64,37 @@ public class Main {
     public static String scoliosis = System.getenv("APPDATA") + "\\scoliosis";
     public static String baseName = System.getenv("APPDATA") + "\\scoliosis\\2dBallGame";
     public static String resourcesFile = baseName + "\\resources";
+
+    public static String[] completedLevels;
+    public static int highestUnlockedWorld = 0;
+    public static int highestUnlockedLevel = 0;
+
+    static {
+        if (Files.exists(Paths.get(resourcesFile + "/times.scolio"))) {
+            try {
+                String fileInfo = Files.readAllLines(Paths.get(resourcesFile + "/times.scolio")).toString();
+                String[] fileSplit = fileInfo.replaceAll("\\[", "").replaceAll("]", "").split(",");
+                completedLevels = new String[fileSplit.length];
+                for (int i = 0; i < fileSplit.length; i++) {
+                    completedLevels[i] = fileSplit[i].replace(".map", "").split(":")[0];
+                    int worldNumber = Integer.parseInt(completedLevels[i].split("-")[0]);
+                    int levelNumber = Integer.parseInt(completedLevels[i].split("-")[1]);
+
+                    if (worldNumber > highestUnlockedWorld) {
+                        highestUnlockedWorld = worldNumber;
+                        highestUnlockedLevel = levelNumber;
+                    }
+                    else if (worldNumber == highestUnlockedWorld) {
+                        if (levelNumber > highestUnlockedLevel) highestUnlockedLevel = levelNumber;
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } {
+
+            }
+        }
+    }
 
     public static void loadresources() {
 
@@ -104,7 +133,7 @@ public class Main {
                 if (file.toString().endsWith(".wav")) {
                     try{
                         SoundLib.playSound(file.getName());
-                        System.out.println("loaded " + file.getName());
+                        //System.out.println("loaded " + file.getName());
 
                     } catch (Exception e){
                         e.printStackTrace();
@@ -118,7 +147,7 @@ public class Main {
 
                         // opens file once, so it will open faster next time (barely saves any time)
                         ImageIO.read(file);
-                        System.out.println("loaded " + file.getName());
+                        //System.out.println("loaded " + file.getName());
                     }
                     catch (IOException e) {
 

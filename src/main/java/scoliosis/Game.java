@@ -74,6 +74,8 @@ public class Game {
 
     public static int lives = 3;
 
+    public static double overalltimetaken = 0d;
+
     public static void game(BufferedImage bi, BufferStrategy bs) throws IOException {
         if (bs != null) {
             Graphics g = bs.getDrawGraphics();
@@ -90,8 +92,9 @@ public class Game {
                 bs.show();
             }
 
-            else if (ChooseLevel.campaign && map >= sortedCampaignLevels.length && win) {
+            else if (ChooseLevel.campaign && map >= sortedCampaignLevels.length-1 && win) {
                 RenderLib.drawCenteredString(g, "WELL DONE!", 240, 120, 40, "Comic Sans MS", 1, new Color(164, 0, 255, 255));
+                RenderLib.drawCenteredString(g, "time taken: " + (overalltimetaken + timespent), 240, 160, 40, "Comic Sans MS", 1, new Color(255, 0, 253, 255));
 
                 if (KeyLib.keyPressed(KeyEvent.VK_R)) {
                     map = 0;
@@ -128,7 +131,13 @@ public class Game {
                     }
 
                     if (ChooseLevel.campaign) g.drawImage(background[Integer.parseInt(sortedCampaignLevels[map-1].substring(0,1)) - 1], 0, 0, ScreenLib.width, ScreenLib.height, null);
-                    else g.drawImage(background[0], 0, 0, ScreenLib.width, ScreenLib.height, null);
+                    else {
+                        try {
+                            g.drawImage(background[Integer.parseInt(lastLoadedMap.substring(0, 1))-1], 0, 0, ScreenLib.width, ScreenLib.height, null);
+                        } catch (NumberFormatException e) {
+                            g.drawImage(background[0], 0, 0, ScreenLib.width, ScreenLib.height, null);
+                        }
+                    }
 
                     if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
                         if (!testing) ScreenLib.changeScreen("pause");
@@ -225,26 +234,30 @@ public class Game {
                     if (win) {
                         time = System.currentTimeMillis();
                         if (ChooseLevel.campaign) {
-                            if (yvelocity < 1) yvelocity = 1f;
+                            ycoordinate -= 4;
+                            if (yvelocity < 1) yvelocity = 0f;
                             xvelocity += 0.2f;
-                        } else xvelocity = 0;
+                        } else {
+                            xvelocity = 0;
+                            yvelocity=0;
+                        }
 
                         if (!wrotefile) {
                             wrotefile = true;
 
                             String readfile;
-                            String whattowrite = maptoload + ":" + timespent + ",";
+                            String whattowrite = lastLoadedMap + ":" + timespent + ",";
 
                             if (Files.exists(Paths.get(resourcesFile + "/times.scolio"))) {
                                 readfile = Files.readAllLines(Paths.get(resourcesFile + "/times.scolio")).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
-                                if (readfile.contains(maptoload)) {
+                                if (readfile.contains(lastLoadedMap)) {
                                     String[] splittext = readfile.split(",");
                                     for (int i = 0; i < splittext.length; i++) {
-                                        if (splittext[i].contains(maptoload + ":")) {
+                                        if (splittext[i].contains(lastLoadedMap + ":")) {
 
                                             if (Float.parseFloat(splittext[i].split(":")[1]) > timespent) {
                                                 System.out.println("previous record: " + Double.parseDouble(splittext[i].split(":")[1]));
-                                                whattowrite = readfile.replace(splittext[i] + ",", "") + maptoload + ":" + timespent + ",";
+                                                whattowrite = readfile.replace(splittext[i] + ",", "") + lastLoadedMap + ":" + timespent + ",";
                                                 fastesttime = timespent;
                                             } else {
                                                 whattowrite = readfile;
@@ -272,8 +285,10 @@ public class Game {
                         if (ChooseLevel.campaign && xvelocity > 10) {
                             win = false;
                             lives += 2;
+                            overalltimetaken += timespent;
                             KillPlayer();
 
+                            System.out.println("starting next level");
 
                             loadMap(sortedCampaignLevels[ChooseLevel.map]);
                             ChooseLevel.map++;
@@ -335,7 +350,10 @@ public class Game {
     }
 
     public static boolean mapworking = true;
+    public static String lastLoadedMap = "";
     public static void loadMap(String mapname) {
+        lastLoadedMap = mapname;
+
         if (Files.exists(Paths.get(resourcesFile + "/" + mapname))) {
             try {
                 levelreader = Files.readAllLines(Paths.get(resourcesFile + "/"+mapname)).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
@@ -350,6 +368,8 @@ public class Game {
                 else {
                     mapworking = false;
                     System.out.println("current level is empty!");
+
+                    LevelEditor.Locations.clear();
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -359,6 +379,8 @@ public class Game {
             System.out.println("map not found!");
             try {
                 new File(resourcesFile + "/" + mapname).createNewFile();
+                LevelEditor.Locations.clear();
+
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

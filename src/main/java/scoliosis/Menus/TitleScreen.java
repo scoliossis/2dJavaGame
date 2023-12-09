@@ -19,14 +19,14 @@ public class TitleScreen {
     static boolean leftclicked = false;
 
     public static double sillytime = System.currentTimeMillis();
+    public static boolean leveleditor = false;
 
     public static void titleScreen(BufferedImage bi, BufferStrategy bs) throws IOException {
         if (bs != null) {
 
             Graphics g = bs.getDrawGraphics();
-            BufferedImage image = ImageIO.read(new File(resourcesFile + "/titlescreen.png"));
 
-            g.drawImage(image, 0, 0, ScreenLib.width, ScreenLib.height, null);
+            g.drawImage(RenderLib.getBufferedImage("titlescreen"), 0, 0, ScreenLib.width, ScreenLib.height, null);
 
             RenderLib.drawString(g, "game made by scoliosis!", 20, 30, 30, "Comic Sans MS", Font.BOLD, new Color(255,255,255));
 
@@ -38,6 +38,7 @@ public class TitleScreen {
                     RenderLib.drawString(g, titlebuttons[i], 0, 270 - 142 + (i * 40), 43, "SansSerif", Font.ITALIC, new Color(255,255,255));
 
                     if (leftclicked != MouseLib.leftclicked && MouseLib.leftclicked) {
+                        leveleditor = false;
                         if (i == 0) {
                             if (mapworking) ScreenLib.changeScreen("levels");
                         }
@@ -45,7 +46,9 @@ public class TitleScreen {
                             ScreenLib.changeScreen("options");
                         }
                         if (i == 2) {
-                            ScreenLib.changeScreen("leveleditor");
+                            ScreenLib.changeScreen("levels");
+                            ChooseLevel.practisescreen = true;
+                            leveleditor = true;
                         }
 
                     }

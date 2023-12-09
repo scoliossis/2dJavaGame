@@ -1,10 +1,14 @@
 package scoliosis.Libs;
 
+import javafx.scene.SubScene;
 import scoliosis.Display;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -262,7 +266,6 @@ public class RenderLib {
                     numberOfImages++;
                 }
             }
-            System.out.println(numberOfImages);
             allimages = new BufferedImage[numberOfImages];
             ImageNames = new String[numberOfImages];
             int i = 0;
@@ -319,5 +322,47 @@ public class RenderLib {
         }
 
         return image2;
+    }
+
+    // horribly slow + an ehh looking blur
+    public static BufferedImage BlurBufferedImage(BufferedImage image, int bluramoun) {
+        BufferedImage blurred = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+
+        for (int x = -bluramoun; x < image.getWidth(); x+=bluramoun) {
+            for (int y = -bluramoun; y < image.getHeight(); y+=bluramoun) {
+
+                for (int i = 0; i < 360; i += 1) {
+                    for (int r = 0; r < bluramoun; r++) {
+                        double angle = i * Math.PI / 180;
+
+                        int x2 = (int) (x + r * Math.cos(angle));
+                        int y2 = (int) (y + r * Math.sin(angle));
+
+                        if (x2 < ScreenLib.width && x2 > 0 && y2 < ScreenLib.height && y2 > 0 && x < ScreenLib.width && x > 0 && y < ScreenLib.height && y > 0) {
+                            blurred.setRGB(x2, y2, image.getRGB(x, y));
+                        }
+                    }
+                }
+            }
+        }
+
+        return blurred;
+    }
+
+
+    public static BufferedImage BlurBufferedImage(BufferedImage image) {
+        int radius = 11;
+        int size = radius * 2 + 1;
+        float weight = 1.0f / (size * size);
+        float[] data = new float[size * size];
+
+        Arrays.fill(data, weight);
+
+        Kernel kernel = new Kernel(size, size, data);
+        ConvolveOp filter = new ConvolveOp(kernel, ConvolveOp.EDGE_ZERO_FILL, null);
+        BufferedImage BlurredImage = filter.filter(image, null);
+
+
+        return BlurredImage.getSubimage(12, 12, image.getWidth()-12-(image.getWidth()/10), image.getHeight()-12-(image.getHeight()/10));
     }
 }
