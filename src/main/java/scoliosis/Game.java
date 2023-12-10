@@ -70,7 +70,7 @@ public class Game {
     static double leftovertime = 0;
     static double timelast = System.currentTimeMillis();
 
-    static int fpslockmax = 5;
+    static int fpslockmax = 10;
 
     public static int lives = 3;
 
@@ -123,7 +123,7 @@ public class Game {
 
                 leftovertime = (System.currentTimeMillis() - timelast) - fpslockmax;
 
-                while (leftovertime >= fpslockmax) {
+                if (leftovertime >= fpslockmax) {
                     leftovertime -= fpslockmax;
                     ticks++;
                     if (ticks == 1) {
@@ -304,8 +304,7 @@ public class Game {
                     if (ChooseLevel.campaign)
                         RenderLib.drawString(g, "lives: " + lives, 5, 50, 13, "Comic Sans MS", 1, new Color(255, 0, 136));
 
-
-                    g.dispose();
+                    //g.dispose();
                     bs.show();
                     timelast = System.currentTimeMillis();
 

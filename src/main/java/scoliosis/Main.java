@@ -14,39 +14,55 @@ public class Main {
 
     /*
     todo: as of 03/12/23 13:00
+    DONE:
+
     ---- level editor ----
-    color picker - added to list: 3/12/23 - DONE 03/12/23 14:32
+     ̶c̶o̶l̶o̶r̶ ̶p̶i̶c̶k̶e̶r̶ ̶-̶ ̶a̶d̶d̶e̶d̶ ̶t̶o̶ ̶l̶i̶s̶t̶:̶ ̶3̶/̶1̶2̶/̶2̶3̶ ̶-̶ ̶D̶O̶N̶E̶ ̶0̶3̶/̶1̶2̶/̶2̶3̶ ̶1̶4̶:̶3̶2̶ - removed - 04/12/23 20:32
     show previous shit from practise - added to list: 3/12/23 - DONE 03/12/23 15:01
     make gui to choose level - added to list: 3/12/23 - DONE 07/12/23 22:05
-    change spawn point - added to list: 3/12/23
     different blocks (lava, finish flag) - added to list: 3/12/23 - DONE 03/12/23 19:50
     custom block textures - added to list: 3/12/23 - DONE 04/12/23 20:32
+
+    ---- gameplay ----
+    make practise for campaign levels - added to list: 7/12/23 - DONE 09/12/23 17:02
+    add timer - added to list: 3/12/23 - DONE 03/12/23 19:50
+    win screen - added to list: 3/12/23 - DONE 03/12/23 21:19
+    death screen / animation - added to list: 3/12/23 - DONE 05/12/23 20:33
+    levels screen - added to list: 3/12/23 - DONE 09/12/23 17:02
+    store multiple levels - added to list: 3/12/23 - DONE 03/12/23 21:16
+
+    ---- bug fixes ----
+     ̶n̶o̶ ̶c̶o̶l̶l̶i̶s̶i̶o̶n̶s̶ ̶i̶n̶ ̶n̶e̶g̶a̶t̶i̶v̶e̶ ̶c̶o̶o̶r̶d̶i̶n̶a̶t̶e̶s̶ ̶-̶ ̶a̶d̶d̶e̶d̶ ̶t̶o̶ ̶l̶i̶s̶t̶ ̶0̶5̶/̶1̶2̶/̶2̶3̶ - idrc, its not needed for now
+     ̶f̶i̶x̶ ̶c̶o̶l̶l̶i̶s̶i̶o̶n̶ ̶i̶s̶s̶u̶e̶s̶ ̶-̶ ̶a̶d̶d̶e̶d̶ ̶t̶o̶ ̶l̶i̶s̶t̶ ̶0̶̶3̶̶/̶1̶2̶/̶2̶3̶ - is a feature for now :sunglasses:
+    moving while paused - added to list 3/12/23 - DONE 04/12/23 21:18
+    no collisions if fps drop - added to list 3/12/23 - DONE 04/12/23 21:18
+    move WAY too fast if fps drop - added to list 3/12/23 - DONE 05/12/23 17:06
+    textures in level editor going outside box boundaries - added to list 05/12/23 - DONE 05/12/23 21:18
+    placing textures behind top bar while top bar still visible - added to list 05/12/23 - DONE 07/12/23 0:15
+
+
+    NOT DONE!
+    NOT DONE!
+    NOT DONE!
+
+    ---- level editor ----
+    change spawn point - added to list: 3/12/23
     change background option - added to list: 3/12/23
+    draw line / box tool - added to list: 10/12/23
 
     ---- gameplay ----
     make campaign - added to list: 3/12/23 - Started:
         level 1-1 - 03/12/23 19:41
+        level 1-2 - 09/12/23 17:01
         level 8-1 - 05/12/23 8:20
 
-    make hard mode / hardcore - added to list: 7/12/23
-    make practise for campaign levels - added to list: 7/12/23
-    make special tab for custom levels - added to list: 7/12/23
-    add timer - added to list: 3/12/23 - DONE 03/12/23 19:50
     add enemies with set paths - added to list: 3/12/23
     add music - added to list: 3/12/23
-    win screen - added to list: 3/12/23 - DONE 03/12/23 21:19
-    death screen / animation - added to list: 3/12/23 - DONE 05/12/23 20:33
-    levels screen - added to list: 3/12/23
-    store multiple levels - added to list: 3/12/23 - DONE 03/12/23 21:16
+    make special tab for custom levels - added to list: 7/12/23
+    make hard mode / hardcore - added to list: 7/12/23
 
     ---- bug fixes ----
-    fix collision issues - added 3/12/23 - is a feature for now :sunglasses:
-    moving while paused - added to list 3/12/23 - DONE 04/12/23 21:18
-    no collisions if fps drop - added to list 3/12/23 - DONE 04/12/23 21:18
-    move WAY too fast if fps drop - added to list 3/12/23 - DONE 05/12/23 17:06
-    no collisions in negative coordinates - added to list 05/12/23 - may not fix as is slightly useless...
-    textures in level editor going outside box boundaries - added to list 05/12/23 - DONE 05/12/23 21:18
-    placing textures behind top bar while top bar still visible - added to list 05/12/23 - DONE 07/12/23 0:15
+    fps issues ig - added to list 09/12/23
      */
 
     public static void main(String[] args) throws IOException {

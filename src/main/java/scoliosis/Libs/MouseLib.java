@@ -51,15 +51,15 @@ public class MouseLib implements AWTEventListener {
 
 
     public static int mousexcoord(float divnum) {
-        return (int) (((MouseInfo.getPointerInfo().getLocation().x - Display.mainframe.getX() - (10f/ (Display.mainframe.getWidth()/480f))) / divnum) / (Display.mainframe.getWidth()/480f));
+        return (int) (((MouseInfo.getPointerInfo().getLocation().x - Display.mainframe.getX() - (8f/ (Display.mainframe.getWidth()/480f))) / divnum) / (Display.mainframe.getWidth()/480f));
     };
 
     public static int realmousexcoord() {
-        return (int) (((MouseInfo.getPointerInfo().getLocation().x - Display.mainframe.getX() - (10f/ (Display.mainframe.getWidth()/480f)))) / (Display.mainframe.getWidth()/480f));
+        return (int) (((MouseInfo.getPointerInfo().getLocation().x - Display.mainframe.getX() - (8f/ (Display.mainframe.getWidth()/480f)))) / (Display.mainframe.getWidth()/480f));
     };
 
     public static int mouseycoord(float divnum) {
-        return (int) (((MouseInfo.getPointerInfo().getLocation().y - Display.mainframe.getY() - (36f/(Display.mainframe.getHeight()/270f))) / divnum) / (Display.mainframe.getHeight()/270f));
+        return (int) (((MouseInfo.getPointerInfo().getLocation().y - Display.mainframe.getY() - (36f/(Display.mainframe.getHeight()/270f))) / divnum) / (Display.mainframe.getHeight()/270f)) - 1;
     };
 
     public static int realmouseycoord() {

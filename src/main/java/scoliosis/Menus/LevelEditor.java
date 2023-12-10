@@ -18,12 +18,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static scoliosis.Game.charecterwidth;
 import static scoliosis.GameLibs.MoveLib.*;
 import static scoliosis.GameLibs.Velocity.*;
 import static scoliosis.Libs.MouseLib.*;
 import static scoliosis.Libs.RenderLib.background;
+import static scoliosis.Libs.RenderLib.getBufferedImage;
 import static scoliosis.Main.*;
 
 public class LevelEditor {
@@ -61,6 +63,15 @@ public class LevelEditor {
 
     static double leftovertime = 0;
     static double timelast = System.currentTimeMillis();
+
+    public static int shapeMode = 0;
+    public static int[] leftclickedpos = new int[2];
+
+    static int shapeX = 0;
+    static int shapeY = 0;
+    static int shapeW = 0;
+    static int shapeH = 0;
+
 
     public static void LevelEditor(BufferedImage bi, BufferStrategy bs) throws IOException {
         leftovertime = (System.currentTimeMillis() - timelast) - 20;
@@ -140,7 +151,88 @@ public class LevelEditor {
                     xoffset -= 15;
                 }
 
-                if ((leftclicked || rightclicked) && (realmouseycoord() >= 35 || !showtopbar)) {
+                if (((leftclicked && !mouseclicked) || (rightclicked && !rightclicker)) && shapeMode != 0) {
+                    leftclickedpos[0] = mousexcoord(boxsize);
+                    leftclickedpos[1] = mouseycoord(boxsize);
+                }
+
+                if (shapeMode >= 1 && ((leftclicked && mouseclicked) || (rightclicked && rightclicker))) {
+                    int xco = (int) ((int) ((int) ((((leftclickedpos[0] * boxsize - xoffset) / (zoomed / 10f)) + (xoffset % boxsize)))) * (zoomed / 10f) + xoffset);
+                    int wid = (MouseLib.mousexcoord(boxsize)-leftclickedpos[0]) * boxsize + boxsize;
+                    int yco = leftclickedpos[1] * boxsize;
+                    int hei = (MouseLib.mouseycoord(boxsize) - leftclickedpos[1]) * boxsize + boxsize;
+
+                    if (wid > 0 && hei > 0) {
+
+                        for (int x = 0; x < wid/boxsize; x++) {
+                            for (int y = 0; y < hei/boxsize; y++) {
+                                shapeX = xco;
+                                shapeY = yco;
+                                shapeW = wid;
+                                shapeH = hei;
+
+                                if (leftclicked) RenderLib.drawImage(x*boxsize + xco, y*boxsize + yco, boxsize, boxsize, block, g);
+                            }
+                        }
+
+                        if (rightclicker) RenderLib.drawOutline(xco, yco, wid, hei, new Color(255,0,0), g);
+                    }
+                    else {
+                        shapeW = 0;
+                        shapeH = 0;
+                    }
+                }
+
+                if (shapeMode >= 1) {
+                    if (!leftclicked && mouseclicked) {
+                        for (int x = 0; x < shapeW; x += boxsize) {
+                            for (int y = 0; y < shapeH; y += boxsize) {
+
+                                boolean founded = false;
+                                for (int i = 0; i < Locations.size(); i += 6) {
+                                    if ((int) Locations.get(i) == shapeX + x && (int) Locations.get(i + 1) == shapeY + y) {
+                                        if (shapeMode == 2) {
+                                            Locations.remove(i);
+                                            Locations.remove(i);
+                                            Locations.remove(i);
+                                            Locations.remove(i);
+                                            Locations.remove(i);
+                                            Locations.remove(i);
+                                        }
+                                        else founded = true;
+                                    }
+                                }
+
+                                if (!founded) {
+                                    Locations.add(shapeX + x);
+                                    Locations.add(shapeY + y);
+                                    Locations.add((int) (1 * boxsize / (zoomed / 10f)));
+                                    Locations.add((int) (1 * boxsize / (zoomed / 10f)));
+
+                                    Locations.add(block);
+                                    Locations.add(blocktype);
+                                }
+                            }
+                        }
+                    } else if (!rightclicked && rightclicker) {
+                        for (int x = 0; x < shapeW; x += boxsize) {
+                            for (int y = 0; y < shapeH; y += boxsize) {
+                                for (int i = 0; i < Locations.size(); i += 6) {
+                                    if ((int) Locations.get(i) == shapeX + x && (int) Locations.get(i + 1) == shapeY + y) {
+                                        Locations.remove(i);
+                                        Locations.remove(i);
+                                        Locations.remove(i);
+                                        Locations.remove(i);
+                                        Locations.remove(i);
+                                        Locations.remove(i);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if ((leftclicked || rightclicked) && (realmouseycoord() >= 35 || !showtopbar) && shapeMode == 0) {
                     boolean dontadd = false;
                     for (int i = 0; i < Locations.size(); i += 6) {
                         if ((int) Locations.get(i) == (int) ((((mousexcoord(boxsize) * boxsize - xoffset) / (zoomed / 10f)) + (xoffset % boxsize)))) {
@@ -240,6 +332,23 @@ public class LevelEditor {
                         }
                     }
 
+                    // shapes
+                    RenderLib.drawRect(40, 3, 100, 26, new Color(215, 216, 229), g);
+                    RenderLib.drawOutline(40, 3, 100, 26, new Color(48, 51, 63), g);
+
+
+                    if (shapeMode == 1) RenderLib.drawOutline(45, 5, 10, 10, new Color(255, 0, 0), g);
+                    else RenderLib.drawOutline(45, 5, 10, 10, new Color(0, 0, 0), g);
+
+                    if (shapeMode == 2) RenderLib.drawRect(60, 5, 10, 10, new Color(255, 0, 0), g);
+                    else RenderLib.drawRect(60, 5, 10, 10, new Color(0, 0, 0), g);
+
+                    if (leftclicked && !mouseclicked) {
+                        if (MouseLib.isMouseOverCoords(45, 5, 10, 10)) shapeMode = 1;
+                        else if (MouseLib.isMouseOverCoords(60, 5, 10, 10)) shapeMode = 2;
+                    }
+
+
                     RenderLib.drawRect(170, 18, 30, 14, new Color(215, 216, 229), g);
                     RenderLib.drawOutline(170, 18, 30, 14, new Color(48, 51, 63), g);
                     RenderLib.drawString(g, "T: " + blocktype, 172, 30, 12, "Comic Sans MS", 0, new Color(0, 0, 0));
@@ -260,6 +369,7 @@ public class LevelEditor {
                         }
 
                         if (isMouseOverCoords(xcoord, ycoord, 10, 10) && leftclicked && !mouseclicked) {
+                            shapeMode = 0;
                             block = i;
                         }
                     }
