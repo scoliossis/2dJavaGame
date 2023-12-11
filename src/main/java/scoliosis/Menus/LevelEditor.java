@@ -76,7 +76,7 @@ public class LevelEditor {
     public static void LevelEditor(BufferedImage bi, BufferStrategy bs) throws IOException {
         leftovertime = (System.currentTimeMillis() - timelast) - 20;
 
-        while (leftovertime >= 20) {
+        if (leftovertime >= 20) {
             leftovertime -= 20;
             if (bs != null) {
 

@@ -252,7 +252,8 @@ public class RenderLib {
 
     static BufferedImage[] currentimage = new BufferedImage[textures.length];
 
-    static {
+
+    public static void loadImages() {
         try {
             for (int i = 0; i < textures.length; i++) {
                 currentimage[i] = ImageIO.read(new File(resourcesFile + "/"+textures[i]+".png"));

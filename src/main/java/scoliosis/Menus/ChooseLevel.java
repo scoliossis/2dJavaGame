@@ -161,7 +161,8 @@ public class ChooseLevel {
 
     public static ArrayList allLevels = new ArrayList();
 
-    static {
+
+    public static void getLevels() {
         if (Files.exists(Paths.get(Main.resourcesFile))) {
             for (File file : Paths.get(Main.resourcesFile).toFile().listFiles()) {
                 if (file.getName().endsWith(".map")) {

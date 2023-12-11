@@ -70,248 +70,333 @@ public class Game {
     static double leftovertime = 0;
     static double timelast = System.currentTimeMillis();
 
-    static int fpslockmax = 10;
+    static int fpslockmax = 5;
 
     public static int lives = 3;
 
     public static double overalltimetaken = 0d;
+    static Graphics g = null;
+    static BufferStrategy publicBuffer;
+    static double millisbetweentick = timebeforetick - timeaftertick;
+
+    static int fakefakex = 0;
+
 
     public static void game(BufferedImage bi, BufferStrategy bs) throws IOException {
         if (bs != null) {
-            Graphics g = bs.getDrawGraphics();
+            g = bs.getDrawGraphics();
+            publicBuffer = bs;
 
-            if (ChooseLevel.campaign && lives <= 0) {
-                RenderLib.drawCenteredString(g, "good night (press r)", 240, 120, 40, "Comic Sans MS", 1, new Color(255, 0, 0, 140));
-                map = 0;
-
-                if (KeyLib.keyPressed(KeyEvent.VK_R)) {
-                    ScreenLib.changeScreen("levels");
-                }
-
-                g.dispose();
-                bs.show();
-            }
-
-            else if (ChooseLevel.campaign && map >= sortedCampaignLevels.length-1 && win) {
-                RenderLib.drawCenteredString(g, "WELL DONE!", 240, 120, 40, "Comic Sans MS", 1, new Color(164, 0, 255, 255));
-                RenderLib.drawCenteredString(g, "time taken: " + (overalltimetaken + timespent), 240, 160, 40, "Comic Sans MS", 1, new Color(255, 0, 253, 255));
-
-                if (KeyLib.keyPressed(KeyEvent.VK_R)) {
-                    map = 0;
-                    ScreenLib.changeScreen("levels");
-                }
-
-                g.dispose();
-                bs.show();
-            }
-
-
+            if (checkDiedCampaign());
+            else if (checkBeatCampaign());
             else {
-                timebeforetick = System.nanoTime();
+                getFPS();
 
-                double millisbetweentick = timebeforetick - timeaftertick;
+                drawGame();
+            }
+        }
+    }
 
-                timeaftertick = System.nanoTime();
+    static void getColorOfBall() {
+        colorofball = new Color(105, 105, 252);
+        outsidering = new Color(0, 0, 0);
+        if (sprinting) {
+            colorofball = new Color(18, 166, 255);
+            outsidering = new Color(255, 255, 255);
+        }
+    }
+    static void getCharacterHeight() {
+        if (yvelocity < -2) {
+            charecterheight = 20;
+        } else if (yvelocity > 2) {
+            charecterheight = 30;
+        } else if (sprinting && !onGround) {
+            charecterheight = 23;
+        } else {
+            charecterheight = 25;
+        }
+    }
 
+    static void drawGameBackground() {
+        if (ChooseLevel.campaign) g.drawImage(background[Integer.parseInt(sortedCampaignLevels[map-1].substring(0,1)) - 1], 0, 0, ScreenLib.width, ScreenLib.height, null);
+        else {
+            try {
+                g.drawImage(background[Integer.parseInt(lastLoadedMap.substring(0, 1))-1], 0, 0, ScreenLib.width, ScreenLib.height, null);
+            } catch (NumberFormatException e) {
+                g.drawImage(background[0], 0, 0, ScreenLib.width, ScreenLib.height, null);
+            }
+        }
+    }
 
-                // so it doesnt check too often.
-                if (System.currentTimeMillis() % 75 == 0)
-
-                    // gets the amount of seconds between each frame, then divide 1 by it.
-                    fps = 1 / (millisbetweentick / 1000000000);
-
-
-                leftovertime = (System.currentTimeMillis() - timelast) - fpslockmax;
-
-                if (leftovertime >= fpslockmax) {
-                    leftovertime -= fpslockmax;
-                    ticks++;
-                    if (ticks == 1) {
-                        time = System.currentTimeMillis();
+    static void respawnScreen() {
+        if (respawning) {
+            if (findfinish) {
+                findfinish = false;
+                for (int i = 0; i < levelreaderSplit.length; i += 6) {
+                    if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) {
+                        fakex = Integer.parseInt(levelreaderSplit[i]);
+                        i = levelreaderSplit.length;
                     }
+                }
+            }
 
-                    if (ChooseLevel.campaign) g.drawImage(background[Integer.parseInt(sortedCampaignLevels[map-1].substring(0,1)) - 1], 0, 0, ScreenLib.width, ScreenLib.height, null);
-                    else {
-                        try {
-                            g.drawImage(background[Integer.parseInt(lastLoadedMap.substring(0, 1))-1], 0, 0, ScreenLib.width, ScreenLib.height, null);
-                        } catch (NumberFormatException e) {
-                            g.drawImage(background[0], 0, 0, ScreenLib.width, ScreenLib.height, null);
-                        }
-                    }
+            xcoordinate = spawnx;
+            ycoordinate = spawny;
+            xvelocity = 0;
+            yvelocity = 0;
+            win = false;
+            ticks = 0;
 
-                    if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
-                        if (!testing) ScreenLib.changeScreen("pause");
-                        else ScreenLib.changeScreen("leveleditor");
-                    }
+            if (fakex - xcoordinate < 100) respawning = false;
+        }
+    }
 
+    static void ShouldKillPlayer() {
+        if (ycoordinate > 270 || (KeyLib.keyPressed(KeyEvent.VK_R)) && !(ChooseLevel.campaign && win)) {
+            KillPlayer();
+        }
+    }
 
-                    colorofball = new Color(105, 105, 252);
-                    outsidering = new Color(0, 0, 0);
-                    if (sprinting) {
-                        colorofball = new Color(18, 166, 255);
-                        outsidering = new Color(255, 255, 255);
-                    }
+    static void setCameraPosition() {
+        if (xcoordinate != fakex) {
+            if (xvelocity > 0) {
+                if (xcoordinate != 100) fakex += (xcoordinate - fakex) * 0.1f;
+                else fakex -= 0.1f;
+            } else if (xvelocity < 0) {
+                if (xcoordinate != 200) fakex += (xcoordinate - fakex) * 0.1f;
+                else fakex += 0.1f;
 
+            } else {
+                fakex += (xcoordinate - fakex) * 0.05f;
+            }
 
-                    // CHECKING IF DIED
-                    if (ycoordinate > 270 || (KeyLib.keyPressed(KeyEvent.VK_R)) && !(ChooseLevel.campaign && win)) {
-                        KillPlayer();
-                    }
+        }
 
-                    if (yvelocity < -2) {
-                        charecterheight = 20;
-                    } else if (yvelocity > 2) {
-                        charecterheight = 30;
-                    } else if (sprinting && !onGround) {
-                        charecterheight = 23;
-                    } else {
-                        charecterheight = 25;
-                    }
+        fakefakex = (int) fakex;
 
-                    //g.drawImage(bi, 0, 0, ScreenLib.width, ScreenLib.height, null);
+    }
 
-                    if (respawning) {
-                        if (findfinish) {
-                            findfinish = false;
-                            for (int i = 0; i < levelreaderSplit.length; i += 6) {
-                                if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) {
-                                    fakex = Integer.parseInt(levelreaderSplit[i]);
-                                    i = levelreaderSplit.length;
-                                }
-                            }
-                        }
+    public static boolean overFPSlock() {
+        leftovertime = (System.currentTimeMillis() - timelast) - fpslockmax;
 
-                        xcoordinate = spawnx;
-                        ycoordinate = spawny;
-                        xvelocity = 0;
-                        yvelocity = 0;
-                        win = false;
-                        ticks = 0;
+        if (leftovertime >= fpslockmax) leftovertime -= fpslockmax;
 
-                        if (fakex - xcoordinate < 100) respawning = false;
-                    }
+        return leftovertime >= fpslockmax;
+    }
 
-                    if (xcoordinate != fakex) {
-                        if (xvelocity > 0) {
-                            if (xcoordinate != 100) fakex += (xcoordinate - fakex) * 0.1f;
-                            else fakex -= 0.1f;
-                        } else if (xvelocity < 0) {
-                            if (xcoordinate != 200) fakex += (xcoordinate - fakex) * 0.1f;
-                            else fakex += 0.1f;
-
-                        } else {
-                            fakex += (xcoordinate - fakex) * 0.05f;
-                        }
-
-                    }
-
-                    int fakefakex = (int) fakex;
-                    int texnum = 0;
-
-                    for (int i = 0; i < levelreaderSplit.length; i += 6) {
-                        if (Integer.parseInt(levelreaderSplit[i + 5]) == 1) {
-                            xtodraw = Integer.parseInt(levelreaderSplit[i]) - fakefakex + 75;
-                            if (xtodraw <= 480 && xtodraw + Integer.parseInt(levelreaderSplit[i + 2]) >= 0) {
-                                RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), Integer.parseInt(levelreaderSplit[i + 4]), g);
-                            }
-
-                        }
-                    }
-
-                    RenderLib.drawCircle(75 + (xcoordinate - fakefakex), ycoordinate - 25, charecterwidth, charecterheight, colorofball, g);
-                    RenderLib.drawCircleOutline(75 + (xcoordinate - fakefakex), ycoordinate - 25, charecterwidth, charecterheight, outsidering, g);
-
-                    RenderLib.drawString(g, "fps: " + Math.round(fps), 380, 30, 10, "Comic Sans MS", 0, new Color(0, 0, 0));
-
-                    for (int i = 0; i < levelreaderSplit.length; i += 6) {
-                        if (Integer.parseInt(levelreaderSplit[i + 5]) != 1) {
-                            xtodraw = Integer.parseInt(levelreaderSplit[i]) - fakefakex + 75;
-                            if (xtodraw <= 480 && xtodraw + Integer.parseInt(levelreaderSplit[i + 2]) >= 0) {
-                                RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), Integer.parseInt(levelreaderSplit[i + 4]), g);
-                            }
-                        }
-                    }
-                    if (win) {
-                        time = System.currentTimeMillis();
-                        if (ChooseLevel.campaign) {
-                            ycoordinate -= 4;
-                            if (yvelocity < 1) yvelocity = 0f;
-                            xvelocity += 0.2f;
-                        } else {
-                            xvelocity = 0;
-                            yvelocity=0;
-                        }
-
-                        if (!wrotefile) {
-                            wrotefile = true;
-
-                            String readfile;
-                            String whattowrite = lastLoadedMap + ":" + timespent + ",";
-
-                            if (Files.exists(Paths.get(resourcesFile + "/times.scolio"))) {
-                                readfile = Files.readAllLines(Paths.get(resourcesFile + "/times.scolio")).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
-                                if (readfile.contains(lastLoadedMap)) {
-                                    String[] splittext = readfile.split(",");
-                                    for (int i = 0; i < splittext.length; i++) {
-                                        if (splittext[i].contains(lastLoadedMap + ":")) {
-
-                                            if (Float.parseFloat(splittext[i].split(":")[1]) > timespent) {
-                                                System.out.println("previous record: " + Double.parseDouble(splittext[i].split(":")[1]));
-                                                whattowrite = readfile.replace(splittext[i] + ",", "") + lastLoadedMap + ":" + timespent + ",";
-                                                fastesttime = timespent;
-                                            } else {
-                                                whattowrite = readfile;
-                                                fastesttime = Double.parseDouble(splittext[i].split(":")[1]);
-                                            }
-
-                                            i = splittext.length;
-                                        }
-                                    }
-                                } else {
-                                    System.out.println("first time completing map!");
-                                    whattowrite = readfile + whattowrite;
-                                }
-                            }
-
-                            BufferedWriter writer = new BufferedWriter(new FileWriter(resourcesFile + "/times.scolio"));
-                            writer.write(whattowrite);
-                            writer.close();
-                        }
-
-
-                        RenderLib.drawCenteredString(g, "gg! completed in " + timespent, 230, 130, 30, "Comic Sans MS", 0, new Color(0, 0, 0));
-                        RenderLib.drawCenteredString(g, "personal best: " + fastesttime + (fastesttime == timespent ? "(NEW PB)" : ""), 230, 170, 30, "Comic Sans MS", 1, new Color(227, 0, 174, 255));
-
-                        if (ChooseLevel.campaign && xvelocity > 10) {
-                            win = false;
-                            lives += 2;
-                            overalltimetaken += timespent;
-                            KillPlayer();
-
-                            System.out.println("starting next level");
-
-                            loadMap(sortedCampaignLevels[ChooseLevel.map]);
-                            ChooseLevel.map++;
-
-                        }
-                    } else {
-                        timespent = ((System.currentTimeMillis() - time) / 1000);
-                        wrotefile = false;
-                    }
-
-                    RenderLib.drawString(g, new DecimalFormat("#.###").format(timespent), 5, 20, 13, "Comic Sans MS", 0, new Color(0, 0, 0));
-
-                    if (ChooseLevel.campaign)
-                        RenderLib.drawString(g, "lives: " + lives, 5, 50, 13, "Comic Sans MS", 1, new Color(255, 0, 136));
-
-                    //g.dispose();
-                    bs.show();
-                    timelast = System.currentTimeMillis();
-
-                    MoveLib.MoveLibChecks();
+    static void drawLevelExceptBackLayer() {
+        for (int i = 0; i < levelreaderSplit.length; i += 6) {
+            if (Integer.parseInt(levelreaderSplit[i + 5]) != 1) {
+                xtodraw = Integer.parseInt(levelreaderSplit[i]) - fakefakex + 75;
+                if (xtodraw <= 480 && xtodraw + Integer.parseInt(levelreaderSplit[i + 2]) >= 0) {
+                    RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), Integer.parseInt(levelreaderSplit[i + 4]), g);
                 }
             }
         }
+    }
+    static void drawPlayer() {
+        RenderLib.drawCircle(75 + (xcoordinate - fakefakex), ycoordinate - 25, charecterwidth, charecterheight, colorofball, g);
+        RenderLib.drawCircleOutline(75 + (xcoordinate - fakefakex), ycoordinate - 25, charecterwidth, charecterheight, outsidering, g);
+    }
+    static void drawLevelBackLayer() {
+        for (int i = 0; i < levelreaderSplit.length; i += 6) {
+            if (Integer.parseInt(levelreaderSplit[i + 5]) == 1) {
+                xtodraw = Integer.parseInt(levelreaderSplit[i]) - fakefakex + 75;
+                if (xtodraw <= 480 && xtodraw + Integer.parseInt(levelreaderSplit[i + 2]) >= 0) {
+                    RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), Integer.parseInt(levelreaderSplit[i + 4]), g);
+                }
+            }
+        }
+    }
+    static void writeNewPB() throws IOException {
+        if (!wrotefile) {
+            wrotefile = true;
+
+            String readfile;
+            String whattowrite = lastLoadedMap + ":" + timespent + ",";
+
+            if (Files.exists(Paths.get(resourcesFile + "/times.scolio"))) {
+                readfile = Files.readAllLines(Paths.get(resourcesFile + "/times.scolio")).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
+                if (readfile.contains(lastLoadedMap)) {
+                    String[] splittext = readfile.split(",");
+                    for (int i = 0; i < splittext.length; i++) {
+                        if (splittext[i].contains(lastLoadedMap + ":")) {
+
+                            if (Float.parseFloat(splittext[i].split(":")[1]) > timespent) {
+                                System.out.println("previous record: " + Double.parseDouble(splittext[i].split(":")[1]));
+                                whattowrite = readfile.replace(splittext[i] + ",", "") + lastLoadedMap + ":" + timespent + ",";
+                                fastesttime = timespent;
+                            } else {
+                                whattowrite = readfile;
+                                fastesttime = Double.parseDouble(splittext[i].split(":")[1]);
+                            }
+
+                            i = splittext.length;
+                        }
+                    }
+                } else {
+                    System.out.println("first time completing map!");
+                    whattowrite = readfile + whattowrite;
+                }
+            }
+
+            BufferedWriter writer = new BufferedWriter(new FileWriter(resourcesFile + "/times.scolio"));
+            writer.write(whattowrite);
+            writer.close();
+        }
+    }
+
+    static void doWinScreen() throws IOException {
+        if (win) {
+            time = System.currentTimeMillis();
+            if (ChooseLevel.campaign) {
+                ycoordinate -= 4;
+                if (yvelocity < 1) yvelocity = 0f;
+                xvelocity += 1f;
+            } else {
+                xvelocity = 0;
+                yvelocity=0;
+            }
+
+            writeNewPB();
+
+            normalWinScreen();
+
+            campaignNextLevelCheck();
+
+        }
+    }
+    static void normalWinScreen() {
+        RenderLib.drawCenteredString(g, "gg! completed in " + timespent, 230, 130, 30, "Comic Sans MS", 0, new Color(0, 0, 0));
+        RenderLib.drawCenteredString(g, "personal best: " + fastesttime + (fastesttime == timespent ? "(NEW PB)" : ""), 230, 170, 30, "Comic Sans MS", 1, new Color(227, 0, 174, 255));
+
+    }
+    static void campaignNextLevelCheck() {
+        if (ChooseLevel.campaign && xvelocity > 10) {
+            win = false;
+            lives += 2;
+            overalltimetaken += timespent;
+            KillPlayer();
+
+            System.out.println("starting next level");
+
+            loadMap(sortedCampaignLevels[ChooseLevel.map]);
+            ChooseLevel.map++;
+
+        }
+    }
+
+    static void tickGame() {
+        ticks++;
+        if (ticks == 1) {
+            time = System.currentTimeMillis();
+        }
+
+        if (!win) {
+            timespent = ((System.currentTimeMillis() - time) / 1000);
+            wrotefile = false;
+        }
+    }
+
+    static void drawHUD() {
+        RenderLib.drawString(g, "fps: " + Math.round(fps), 380, 30, 10, "Comic Sans MS", 0, new Color(0, 0, 0));
+
+        RenderLib.drawString(g, new DecimalFormat("#.###").format(timespent), 5, 20, 13, "Comic Sans MS", 0, new Color(0, 0, 0));
+
+        if (ChooseLevel.campaign)
+            RenderLib.drawString(g, "lives: " + lives, 5, 50, 13, "Comic Sans MS", 1, new Color(255, 0, 136));
+
+    }
+
+    public static void drawGame() throws IOException {
+
+        if (overFPSlock()) {
+            tickGame();
+
+            drawGameBackground();
+
+            if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
+                if (!testing) ScreenLib.changeScreen("pause");
+                else ScreenLib.changeScreen("leveleditor");
+            }
+
+
+            getColorOfBall();
+
+            ShouldKillPlayer();
+
+            getCharacterHeight();
+
+            respawnScreen();
+
+            setCameraPosition();
+
+            drawLevelBackLayer();
+            drawPlayer();
+            drawLevelExceptBackLayer();
+
+            doWinScreen();
+
+            drawHUD();
+
+            finishDrawing();
+
+            timelast = System.currentTimeMillis();
+
+            MoveLib.MoveLibChecks();
+        }
+    }
+
+    static void finishDrawing() {
+        g.dispose();
+        publicBuffer.show();
+    }
+
+    public static void getFPS() {
+        timebeforetick = System.nanoTime();
+
+        millisbetweentick = timebeforetick - timeaftertick;
+
+        timeaftertick = System.nanoTime();
+
+
+        // so it doesnt check too often.
+        if (System.currentTimeMillis() % 75 == 0)
+
+            // gets the amount of seconds between each frame, then divide 1 by it.
+            fps = 1 / (millisbetweentick / 1000000000);
+
+    }
+
+    public static boolean checkBeatCampaign() {
+        if (ChooseLevel.campaign && map >= sortedCampaignLevels.length && win) {
+            RenderLib.drawCenteredString(g, "WELL DONE!", 240, 120, 40, "Comic Sans MS", 1, new Color(164, 0, 255, 255));
+            RenderLib.drawCenteredString(g, "time taken: " + new DecimalFormat("#.###").format(overalltimetaken + timespent), 240, 160, 40, "Comic Sans MS", 1, new Color(255, 0, 253, 255));
+
+            if (KeyLib.keyPressed(KeyEvent.VK_R)) {
+                map = 0;
+                ScreenLib.changeScreen("levels");
+            }
+
+            finishDrawing();
+        }
+
+        return ChooseLevel.campaign && map >= sortedCampaignLevels.length && win;
+    }
+
+    public static boolean checkDiedCampaign() {
+        if (ChooseLevel.campaign && lives <= 0) {
+            RenderLib.drawCenteredString(g, "good night (press r)", 240, 120, 40, "Comic Sans MS", 1, new Color(255, 0, 0, 140));
+            map = 0;
+
+            if (KeyLib.keyPressed(KeyEvent.VK_R)) {
+                ScreenLib.changeScreen("levels");
+            }
+
+            finishDrawing();
+        }
+
+        return ChooseLevel.campaign && lives <= 0;
     }
 
     public static void KillPlayer() {

@@ -1,7 +1,9 @@
 package scoliosis;
 
 import scoliosis.Libs.MouseLib;
+import scoliosis.Libs.RenderLib;
 import scoliosis.Libs.SoundLib;
+import scoliosis.Menus.ChooseLevel;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -22,6 +24,7 @@ public class Main {
     make gui to choose level - added to list: 3/12/23 - DONE 07/12/23 22:05
     different blocks (lava, finish flag) - added to list: 3/12/23 - DONE 03/12/23 19:50
     custom block textures - added to list: 3/12/23 - DONE 04/12/23 20:32
+    draw line / box tool - added to list: 10/12/23 - DONE 10/12/23 14:58
 
     ---- gameplay ----
     make practise for campaign levels - added to list: 7/12/23 - DONE 09/12/23 17:02
@@ -39,6 +42,7 @@ public class Main {
     move WAY too fast if fps drop - added to list 3/12/23 - DONE 05/12/23 17:06
     textures in level editor going outside box boundaries - added to list 05/12/23 - DONE 05/12/23 21:18
     placing textures behind top bar while top bar still visible - added to list 05/12/23 - DONE 07/12/23 0:15
+    fix low fps being UNPLAYABLE - added to list 10/12/23 - DONE 14:59
 
 
     NOT DONE!
@@ -48,7 +52,6 @@ public class Main {
     ---- level editor ----
     change spawn point - added to list: 3/12/23
     change background option - added to list: 3/12/23
-    draw line / box tool - added to list: 10/12/23
 
     ---- gameplay ----
     make campaign - added to list: 3/12/23 - Started:
@@ -63,11 +66,13 @@ public class Main {
 
     ---- bug fixes ----
     fps issues ig - added to list 09/12/23
+
+    ==== other ====
+    put shit into functions so code is readable - added to list 10/12/23
      */
 
     public static void main(String[] args) throws IOException {
-        Toolkit.getDefaultToolkit().addAWTEventListener(new MouseLib(), AWTEvent.MOUSE_EVENT_MASK | AWTEvent.FOCUS_EVENT_MASK);
-        loadresources();
+        load();
 
         Display.DrawDisplay();
     }
@@ -85,7 +90,17 @@ public class Main {
     public static int highestUnlockedWorld = 0;
     public static int highestUnlockedLevel = 0;
 
-    static {
+    public static void load() {
+        Toolkit.getDefaultToolkit().addAWTEventListener(new MouseLib(), AWTEvent.MOUSE_EVENT_MASK | AWTEvent.FOCUS_EVENT_MASK);
+
+        loadresources();
+        RenderLib.loadImages();
+
+        ChooseLevel.getLevels();
+        getCompletedLevels();
+    }
+
+    public static void getCompletedLevels() {
         if (Files.exists(Paths.get(resourcesFile + "/times.scolio"))) {
             try {
                 String fileInfo = Files.readAllLines(Paths.get(resourcesFile + "/times.scolio")).toString();
@@ -99,24 +114,25 @@ public class Main {
                     if (worldNumber > highestUnlockedWorld) {
                         highestUnlockedWorld = worldNumber;
                         highestUnlockedLevel = levelNumber;
-                    }
-                    else if (worldNumber == highestUnlockedWorld) {
+                    } else if (worldNumber == highestUnlockedWorld) {
                         if (levelNumber > highestUnlockedLevel) highestUnlockedLevel = levelNumber;
                     }
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
-            } {
-
             }
         }
     }
 
-    public static void loadresources() {
-
+    public static void makeResourcesFolder() {
         if (!Files.isDirectory(Paths.get(scoliosis))) new File(scoliosis).mkdir();
         if (!Files.isDirectory(Paths.get(baseName))) new File(baseName).mkdir();
         if (!Files.isDirectory(Paths.get(resourcesFile))) new File(resourcesFile).mkdir();
+    }
+
+    public static void loadresources() {
+
+        makeResourcesFolder();
 
 
         // copy files outside of resources file
