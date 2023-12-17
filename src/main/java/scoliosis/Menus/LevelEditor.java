@@ -162,35 +162,30 @@ public class LevelEditor {
                     int yco = leftclickedpos[1] * boxsize;
                     int hei = (MouseLib.mouseycoord(boxsize) - leftclickedpos[1]) * boxsize + boxsize;
 
-                    if (wid > 0 && hei > 0) {
 
-                        for (int x = 0; x < wid/boxsize; x++) {
-                            for (int y = 0; y < hei/boxsize; y++) {
-                                shapeX = xco;
-                                shapeY = yco;
-                                shapeW = wid;
-                                shapeH = hei;
+                    for (int x = Math.min(wid/boxsize, 0); x < Math.max(wid/boxsize, 0); x++) {
+                        for (int y = Math.min(hei/boxsize, 0); y < Math.max(hei/boxsize, 0); y++) {
+                            shapeX = xco;
+                            shapeY = yco;
+                            shapeW = wid;
+                            shapeH = hei;
 
-                                if (leftclicked) RenderLib.drawImage(x*boxsize + xco, y*boxsize + yco, boxsize, boxsize, block, g);
-                            }
+                            if (leftclicked) RenderLib.drawImage(x*boxsize + xco, y*boxsize + yco, boxsize, boxsize, block, g);
                         }
+                    }
 
-                        if (rightclicker) RenderLib.drawOutline(xco, yco, wid, hei, new Color(255,0,0), g);
-                    }
-                    else {
-                        shapeW = 0;
-                        shapeH = 0;
-                    }
+                    if (rightclicker) RenderLib.drawOutline(xco, yco, wid, hei, new Color(255,0,0), g);
+
                 }
 
                 if (shapeMode >= 1) {
                     if (!leftclicked && mouseclicked) {
-                        for (int x = 0; x < shapeW; x += boxsize) {
-                            for (int y = 0; y < shapeH; y += boxsize) {
+                        for (int x = Math.min(shapeW, 0); x < Math.max(shapeW, 0); x += boxsize) {
+                            for (int y = Math.min(shapeH, 0); y < Math.max(shapeH, 0); y += boxsize) {
 
                                 boolean founded = false;
                                 for (int i = 0; i < Locations.size(); i += 6) {
-                                    if ((int) Locations.get(i) == shapeX + x && (int) Locations.get(i + 1) == shapeY + y) {
+                                    if ((int) Locations.get(i) == shapeX + x - xoffset && (int) Locations.get(i + 1) == shapeY + y) {
                                         if (shapeMode == 2) {
                                             Locations.remove(i);
                                             Locations.remove(i);
@@ -204,7 +199,7 @@ public class LevelEditor {
                                 }
 
                                 if (!founded) {
-                                    Locations.add(shapeX + x);
+                                    Locations.add(shapeX + x - xoffset);
                                     Locations.add(shapeY + y);
                                     Locations.add((int) (1 * boxsize / (zoomed / 10f)));
                                     Locations.add((int) (1 * boxsize / (zoomed / 10f)));
@@ -218,7 +213,7 @@ public class LevelEditor {
                         for (int x = 0; x < shapeW; x += boxsize) {
                             for (int y = 0; y < shapeH; y += boxsize) {
                                 for (int i = 0; i < Locations.size(); i += 6) {
-                                    if ((int) Locations.get(i) == shapeX + x && (int) Locations.get(i + 1) == shapeY + y) {
+                                    if ((int) Locations.get(i) == shapeX + x - xoffset && (int) Locations.get(i + 1) == shapeY + y) {
                                         Locations.remove(i);
                                         Locations.remove(i);
                                         Locations.remove(i);
