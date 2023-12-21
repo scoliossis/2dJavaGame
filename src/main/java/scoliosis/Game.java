@@ -32,12 +32,6 @@ import static scoliosis.Menus.LevelEditor.testing;
 
 
 public class Game {
-
-    // dirty brown
-    //150, 60, 30
-    // grassy green
-    // 58, 100, 21
-
     public static String levelreader = "";
     public static String[] levelreaderSplit = "".split(",");
 
