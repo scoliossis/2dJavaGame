@@ -79,7 +79,7 @@ public class Main {
 
     public static String[] backgrounds = {"background", "mushroombackground", "cavebackground", "desertbackground", "skybackground", "swampbackground", "rainbackground", "lavabackground"};
 
-    public static String[] textures = {"dirt", "grass", "sand", "poison", "lavabrick", "coal", "lava", "smoke", "flagpole", "base", "circle", "triangle", "square", "brick", "bluebrick", "whitebrick", "purplebrick", "redbrick", "brownbrick"};
+    public static String[] textures = {"dirt", "grass", "sand", "poison", "lavabrick", "coal", "lava", "smoke", "flagpole", "base", "circle", "triangle", "square", "brick", "bluebrick", "whitebrick", "purplebrick", "redbrick", "brownbrick", "stone", "darkstone", "water", "fungaldirt", "fungalgrass", "fungalwater", "mossybrick", "coin1"};
 
 
     public static String scoliosis = System.getenv("APPDATA") + "\\scoliosis";
@@ -164,7 +164,7 @@ public class Main {
                 // actually big dif no way!!!
                 if (file.toString().endsWith(".wav")) {
                     try{
-                        SoundLib.playSound(file.getName());
+                        SoundLib.loadSound(file.getName());
                         //System.out.println("loaded " + file.getName());
 
                     } catch (Exception e){

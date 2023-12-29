@@ -17,6 +17,7 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -50,7 +51,6 @@ public class LevelEditor {
 
     public static String testmoves = "";
 
-    public static boolean showgrid = true;
 
     public static int zoomed = 10;
 
@@ -72,6 +72,21 @@ public class LevelEditor {
     static int shapeW = 0;
     static int shapeH = 0;
 
+    static boolean lockedonMove = false;
+
+    static String[] blockTypes = {"normal", "background", "foreground", "spike", "goal", "coin"};
+    static boolean blockTypesShow = false;
+
+    static float theWide = 66;
+    static float maxSize = 20;
+    static float minSize = 1;
+
+    static float totalSize = maxSize - minSize;
+    static float widthDivAmount = theWide / totalSize;
+
+    static float sizeAmount = boxsize * widthDivAmount + minSize;
+
+    static boolean acter = false;
 
     public static void LevelEditor(BufferedImage bi, BufferStrategy bs) throws IOException {
         leftovertime = (System.currentTimeMillis() - timelast) - 20;
@@ -81,7 +96,7 @@ public class LevelEditor {
             if (bs != null) {
 
                 Graphics g = bs.getDrawGraphics();
-                g.drawImage(background[0], 0, 0, ScreenLib.width, ScreenLib.height, null);
+                g.drawImage(background[1], 0, 0, ScreenLib.width, ScreenLib.height, null);
 
                 if (KeyLib.keyPressed(KeyEvent.VK_ESCAPE)) {
                     if (askreset) askreset = false;
@@ -91,7 +106,6 @@ public class LevelEditor {
 
                 if (!askreset && KeyLib.keyPressed(KeyEvent.VK_R)) {
                     askreset = true;
-                    //Locations.clear();
                 }
                 if (KeyLib.keyPressed(KeyEvent.VK_P)) {
                     testmoves = "";
@@ -109,6 +123,7 @@ public class LevelEditor {
                     } else System.out.println("level is empty bud!");
                 }
 
+
                 // bugged :(
             /*
             if (KeyLib.keyPressed(KeyEvent.VK_S)) {
@@ -119,7 +134,7 @@ public class LevelEditor {
             }
              */
 
-                if (showgrid) {
+                if (boxsize != 1) {
                     for (int i = (int) (xoffset % (boxsize * zoomed / 10f)); i < 480; i += (int) (boxsize * (zoomed / 10f))) {
                         RenderLib.drawLine(i, 0, i, 270, new Color(32, 32, 32), g);
                     }
@@ -138,8 +153,11 @@ public class LevelEditor {
                 }
 
                 if (((leftclicked && mouseclicked && leftclickedposy > 40) || (rightclicked && rightclicker && rightclickedposy > 40)) && realmouseycoord() <= 40) {
+                    acter = true;
                     showtopbar = false;
-                } else {
+                }
+                if (!leftclicked && mouseclicked && acter) {
+                    acter = false;
                     showtopbar = true;
                 }
 
@@ -155,6 +173,19 @@ public class LevelEditor {
                     leftclickedpos[0] = mousexcoord(boxsize);
                     leftclickedpos[1] = mouseycoord(boxsize);
                 }
+
+                if (leftclicked && !mouseclicked && MouseLib.isMouseOverCoords((int) (spawnx * (zoomed / 10f) + xoffset), (int) (spawny - (25 * (zoomed / 10f))), (int) (25 * (zoomed / 10f)), (int) (25 * (zoomed / 10f)))) {
+                    lockedonMove = true;
+                }
+                else if (!leftclicked && mouseclicked) {
+                    lockedonMove = false;
+                }
+
+                if (leftclicked && lockedonMove) {
+                    spawnx = (int) (MouseLib.mousexcoord(1) * (zoomed / 10f) - xoffset) - 12;
+                    spawny = (int) (MouseLib.mouseycoord(1) - (25 * (zoomed / 10f))) +  25;
+                }
+
 
                 if (shapeMode >= 1 && ((leftclicked && mouseclicked) || (rightclicked && rightclicker))) {
                     int xco = (int) ((int) ((int) ((((leftclickedpos[0] * boxsize - xoffset) / (zoomed / 10f)) + (xoffset % boxsize)))) * (zoomed / 10f) + xoffset);
@@ -227,7 +258,11 @@ public class LevelEditor {
                     }
                 }
 
-                if ((leftclicked || rightclicked) && (realmouseycoord() >= 35 || !showtopbar) && shapeMode == 0) {
+
+
+                if ((leftclicked || rightclicked) && (realmouseycoord() >= 35 || !showtopbar) && shapeMode == 0 && !lockedonMove && !blockTypesShow
+                        && !MouseLib.isMouseOverCoords(430, 0, 16, 10) && !MouseLib.isMouseOverCoords(430, 30, 16, 10)) {
+
                     boolean dontadd = false;
                     for (int i = 0; i < Locations.size(); i += 6) {
                         if ((int) Locations.get(i) == (int) ((((mousexcoord(boxsize) * boxsize - xoffset) / (zoomed / 10f)) + (xoffset % boxsize)))) {
@@ -284,7 +319,9 @@ public class LevelEditor {
                     }
                 }
 
-                RenderLib.drawCircle((int) (50 * (zoomed / 10f) + xoffset), (int) (200 - (25 * (zoomed / 10f))), (int) (25 * (zoomed / 10f)), (int) (25 * (zoomed / 10f)), new Color(160, 250, 239), g);
+
+
+                RenderLib.drawCircle((int) (spawnx * (zoomed / 10f) + xoffset), (int) (spawny - (25 * (zoomed / 10f))), (int) (25 * (zoomed / 10f)), (int) (25 * (zoomed / 10f)), new Color(160, 250, 239), g);
 
                 for (int i = 0; i < Locations.size(); i += 6) {
                     if ((int) ((int) Locations.get(i) * (zoomed / 10f) + xoffset) <= 480 && (int) ((int) Locations.get(i) * (zoomed / 10f) + xoffset) + (int) (((int) Locations.get(i + 2) * 1f) * (zoomed / 10f)) >= 0) {
@@ -313,20 +350,6 @@ public class LevelEditor {
                         } else System.out.println("empty level, please stop!");
                     }
 
-                    RenderLib.drawRect(170, 2, 30, 14, new Color(215, 216, 229), g);
-                    RenderLib.drawOutline(170, 2, 30, 14, new Color(48, 51, 63), g);
-                    RenderLib.drawString(g, "S: " + (showgrid ? boxsize : "0"), 172, 14, 12, "Comic Sans MS", 0, new Color(0, 0, 0));
-
-                    if (isMouseOverCoords(170, 2, 30, 14)) {
-                        boxsize = onenumreplace(boxsize, 0, 10);
-                        if (onenumreplace(boxsize, 0, 10) != 10) showgrid = true;
-                        if (boxsize == 1) boxsize = 10;
-                        if (boxsize == 0) {
-                            showgrid = !showgrid;
-                            boxsize = 10;
-                        }
-                    }
-
                     // shapes
                     RenderLib.drawRect(40, 3, 100, 26, new Color(215, 216, 229), g);
                     RenderLib.drawOutline(40, 3, 100, 26, new Color(48, 51, 63), g);
@@ -344,12 +367,50 @@ public class LevelEditor {
                     }
 
 
-                    RenderLib.drawRect(170, 18, 30, 14, new Color(215, 216, 229), g);
-                    RenderLib.drawOutline(170, 18, 30, 14, new Color(48, 51, 63), g);
-                    RenderLib.drawString(g, "T: " + blocktype, 172, 30, 12, "Comic Sans MS", 0, new Color(0, 0, 0));
 
-                    if (isMouseOverCoords(170, 18, 30, 14)) {
-                        blocktype = onenumreplace(blocktype, 0, 4);
+                    // grid size
+                    RenderLib.drawRect(142, 2, 66, 14, new Color(215, 216, 229), g);
+                    RenderLib.drawOutline(142, 2, 66, 14, new Color(48, 51, 63), g);
+                    RenderLib.drawString(g, "grid size: " + boxsize, 144, 10, 9, "Comic Sans MS", 0, new Color(0, 0, 0));
+
+                    if (leftclicked && isMouseOverCoords(142, 2, 66, 14)) {
+                        sizeAmount = MouseLib.mousexcoord(1) - 142f;
+                        boxsize = (int) ((int) (sizeAmount / widthDivAmount) + minSize);
+                    }
+
+                    RenderLib.drawRect(142, 14, (Math.min((int) sizeAmount, 66)), 2, new Color(200, 20, 240), g);
+
+
+                    // block type changer
+                    RenderLib.drawRect(142, 18, 66, 14, new Color(215, 216, 229), g);
+                    RenderLib.drawString(g, blockTypes[blocktype], 143, 29, 12, "Comic Sans MS", 0, new Color(0, 0, 0));
+
+                    if (blockTypesShow) {
+                        for (int i = 0; i < blockTypes.length; i++) {
+                            RenderLib.drawRect(142, 15 + (15 * (i+1)), 66, 16, new Color(215, 216, 229), g);
+                            RenderLib.drawString(g, blockTypes[i], 143, 15 + (15 * (i+1)) + 12, 12, "Comic Sans MS", 0, new Color(0,0,0));
+
+                            if (leftclicked && !mouseclicked && MouseLib.isMouseOverCoords(142, 15 + (15 * (i+1)), 66, 16)) {
+                                blocktype = i;
+                                blockTypesShow = false;
+                            }
+                        }
+                    }
+
+                    if (isMouseOverCoords(142, 18, 66, 14)) {
+                        if (leftclicked && !mouseclicked) blockTypesShow = !blockTypesShow;
+                    }
+
+                    if (!blockTypesShow) RenderLib.drawOutline(142, 18, 66, 14, new Color(48, 51, 63), g);
+                    else RenderLib.drawOutline(142, 18, 66, 13 + (15 * (blockTypes.length)), new Color(48, 51, 63), g);
+
+
+
+                    RenderLib.drawRect(430, 35, 16, 10, new Color(215, 216, 229), g);
+                    RenderLib.drawPoligon(new int[]{434, 438, 442}, new int[]{43, 37, 43}, new Color(48, 51, 63), g);
+
+                    if (MouseLib.isMouseOverCoords(430, 35, 16, 10) && leftclicked && !mouseclicked) {
+                        showtopbar = false;
                     }
 
                     RenderLib.drawRect(210, 3, 210, 26, new Color(215, 216, 229), g);
@@ -369,6 +430,16 @@ public class LevelEditor {
                         }
                     }
 
+                }
+
+
+                else {
+                    RenderLib.drawRect(430, 0, 16, 10, new Color(215, 216, 229), g);
+                    RenderLib.drawPoligon(new int[]{434, 438, 442}, new int[]{2, 8, 2}, new Color(48, 51, 63), g);
+
+                    if (MouseLib.isMouseOverCoords(430, 0, 16, 10) && leftclicked && !mouseclicked) {
+                        showtopbar = true;
+                    }
                 }
 
                 if (testmoves != "") {
@@ -409,40 +480,5 @@ public class LevelEditor {
         }
 
     }
-
-    public static int colorTextBox(int startnum) {
-        // CODED AT 3AM I WILL MAKE IT NOT LOOK LIKE THIS LATER IDFC
-        if (KeyLib.keyPressed(KeyEvent.VK_0)) startnum = Math.min(255, Integer.parseInt(startnum+"0"));
-        else if (KeyLib.keyPressed(KeyEvent.VK_1)) startnum = Math.min(255, Integer.parseInt(startnum+"1"));
-        else if (KeyLib.keyPressed(KeyEvent.VK_2)) startnum = Math.min(255, Integer.parseInt(startnum+"2"));
-        else if (KeyLib.keyPressed(KeyEvent.VK_3)) startnum = Math.min(255, Integer.parseInt(startnum+"3"));
-        else if (KeyLib.keyPressed(KeyEvent.VK_4)) startnum = Math.min(255, Integer.parseInt(startnum+"4"));
-        else if (KeyLib.keyPressed(KeyEvent.VK_5)) startnum = Math.min(255, Integer.parseInt(startnum+"5"));
-        else if (KeyLib.keyPressed(KeyEvent.VK_6)) startnum = Math.min(255, Integer.parseInt(startnum+"6"));
-        else if (KeyLib.keyPressed(KeyEvent.VK_7)) startnum = Math.min(255, Integer.parseInt(startnum+"7"));
-        else if (KeyLib.keyPressed(KeyEvent.VK_8)) startnum = Math.min(255, Integer.parseInt(startnum+"8"));
-        else if (KeyLib.keyPressed(KeyEvent.VK_9)) startnum = Math.min(255, Integer.parseInt(startnum+"9"));
-        else if (KeyLib.keyPressed(KeyEvent.VK_BACK_SPACE)) startnum = String.valueOf(startnum).length() == 1 ? 0 : Math.max(0, Integer.parseInt(String.valueOf(startnum).substring(0, String.valueOf(startnum).length()-1)));
-
-        return startnum;
-    };
-
-    public static int onenumreplace(int num, int min, int max) {
-        // CODED AT 3AM I WILL MAKE IT NOT LOOK LIKE THIS LATER IDFC
-
-        if (KeyLib.keyPressed(KeyEvent.VK_0)) num = 0;
-        else if (KeyLib.keyPressed(KeyEvent.VK_1)) num = 1;
-        else if (KeyLib.keyPressed(KeyEvent.VK_2)) num = 2;
-        else if (KeyLib.keyPressed(KeyEvent.VK_3)) num = 3;
-        else if (KeyLib.keyPressed(KeyEvent.VK_4)) num = 4;
-        else if (KeyLib.keyPressed(KeyEvent.VK_5)) num = 5;
-        else if (KeyLib.keyPressed(KeyEvent.VK_6)) num = 6;
-        else if (KeyLib.keyPressed(KeyEvent.VK_7)) num = 7;
-        else if (KeyLib.keyPressed(KeyEvent.VK_8)) num = 8;
-        else if (KeyLib.keyPressed(KeyEvent.VK_9)) num = 9;
-        if (num < min) num = 10;
-        num = Math.min(max, num);
-        return num;
-    };
 
 }

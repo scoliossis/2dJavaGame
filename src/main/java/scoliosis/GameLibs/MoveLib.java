@@ -1,8 +1,11 @@
 package scoliosis.GameLibs;
 
+import scoliosis.Game;
 import scoliosis.Libs.KeyLib;
+import scoliosis.Libs.SoundLib;
 
 import java.awt.event.KeyEvent;
+import java.util.Arrays;
 
 import static scoliosis.Game.*;
 import static scoliosis.GameLibs.Velocity.*;
@@ -55,7 +58,7 @@ public class MoveLib {
             float ogxvelo = xvelocity;
             float ogyvelo = yvelocity;
 
-            while (leftovertime >= 20) {
+            if (leftovertime >= 20) {
                 leftovertime -= 20;
 
                 onCeiling = false;
@@ -65,6 +68,7 @@ public class MoveLib {
 
                 for (int i = 0; i < levelreaderSplit.length; i += 6) {
 
+                    // change < 100 / > -100 to < xvelo and < -xvelo to fix high speed collision issues i believe!
                     if (Integer.parseInt(levelreaderSplit[i]) - xcoordinate < 100 && Integer.parseInt(levelreaderSplit[i]) > -100) {
                         if (Integer.parseInt(levelreaderSplit[i + 5]) == 0 || Integer.parseInt(levelreaderSplit[i + 5]) == 3 || Integer.parseInt(levelreaderSplit[i + 5]) == 4) {
                             // check if over a x coordinate
@@ -72,6 +76,12 @@ public class MoveLib {
 
                                 // coliding with wall check
                                 if (Integer.parseInt(levelreaderSplit[i + 1]) + Integer.parseInt(levelreaderSplit[i + 3]) >= ycoordinate && Integer.parseInt(levelreaderSplit[i + 1]) <= ycoordinate - 5) {
+
+                                    if (Integer.parseInt(levelreaderSplit[i + 4]) == 26) {
+                                        collectCoin(i);
+                                        continue;
+                                    }
+
                                     wallx = (int) Integer.parseInt(levelreaderSplit[i]);
                                     wallw = (int) Integer.parseInt(levelreaderSplit[i + 2]);
                                     onWall = true;
@@ -84,6 +94,7 @@ public class MoveLib {
                                         KillPlayer();
                                         return;
                                     }
+
                                     if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) win();
 
                                 }
@@ -91,6 +102,12 @@ public class MoveLib {
 
                                 // on ground check
                                 if (Integer.parseInt(levelreaderSplit[i + 1]) <= ycoordinate && Integer.parseInt(levelreaderSplit[i + 1]) + Integer.parseInt(levelreaderSplit[i + 3]) >= ycoordinate) {
+
+                                    if (Integer.parseInt(levelreaderSplit[i + 4]) == 26) {
+                                        collectCoin(i);
+                                        continue;
+                                    }
+
                                     floory = (int) Integer.parseInt(levelreaderSplit[i + 1]);
                                     onGround = true;
                                     sprintedInAir = false;
@@ -99,12 +116,20 @@ public class MoveLib {
                                         KillPlayer();
                                         return;
                                     }
+
+
                                     if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) win();
 
                                 }
 
                                 // stops going through ceiling
                                 if (Integer.parseInt(levelreaderSplit[i + 1]) + Integer.parseInt(levelreaderSplit[i + 3]) <= ycoordinate && Integer.parseInt(levelreaderSplit[i + 1]) + Integer.parseInt(levelreaderSplit[i + 3]) >= ycoordinate - yvelocity && !onWall && !onGround) {
+
+                                    if (Integer.parseInt(levelreaderSplit[i + 4]) == 26) {
+                                        collectCoin(i);
+                                        continue;
+                                    }
+
                                     yvelocity *= -2f;
 
                                     if (Integer.parseInt(levelreaderSplit[i + 5]) == 3) {
@@ -113,11 +138,18 @@ public class MoveLib {
                                     }
                                     if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) win();
 
+                                    if (Integer.parseInt(levelreaderSplit[i + 4]) == 26) collectCoin(i);
+
                                 }
 
 
                                 // stops phasing through floor at high speeds
                                 if (ycoordinate <= Integer.parseInt(levelreaderSplit[i + 1]) + Integer.parseInt(levelreaderSplit[i + 3]) && ycoordinate - yvelocity >= Integer.parseInt(levelreaderSplit[i + 1]) + Integer.parseInt(levelreaderSplit[i + 3])) {
+                                    if (Integer.parseInt(levelreaderSplit[i + 4]) == 26) {
+                                        collectCoin(i);
+                                        continue;
+                                    }
+
                                     yvelocity = 2f;
                                     doyVelocity = false;
 
@@ -126,6 +158,8 @@ public class MoveLib {
                                         return;
                                     }
                                     if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) win();
+
+
                                 }
 
                             }
@@ -136,6 +170,11 @@ public class MoveLib {
 
                                 // if going through wall bounce back
                                 if (xcoordinate <= Integer.parseInt(levelreaderSplit[i]) && xcoordinate + xvelocity >= Integer.parseInt(levelreaderSplit[i])) {
+                                    if (Integer.parseInt(levelreaderSplit[i + 4]) == 26) {
+                                        collectCoin(i);
+                                        continue;
+                                    }
+
                                     xcoordinate = (int) Integer.parseInt(levelreaderSplit[i]);
                                     if (charecterheight > Integer.parseInt(levelreaderSplit[i + 3])) yvelocity += 2f;
                                     xvelocity *= -1.3f;
@@ -146,10 +185,17 @@ public class MoveLib {
 
                                 // check other side of wall
                                 else if (xcoordinate >= Integer.parseInt(levelreaderSplit[i]) + Integer.parseInt(levelreaderSplit[i + 2]) && xcoordinate + xvelocity <= Integer.parseInt(levelreaderSplit[i]) + Integer.parseInt(levelreaderSplit[i + 2])) {
+                                    if (Integer.parseInt(levelreaderSplit[i + 4]) == 26) {
+                                        collectCoin(i);
+                                        continue;
+                                    }
+
                                     xcoordinate = (int) (Integer.parseInt(levelreaderSplit[i]) + Integer.parseInt(levelreaderSplit[i + 2]));
                                     if (charecterheight > Integer.parseInt(levelreaderSplit[i + 3])) yvelocity += 2f;
                                     xvelocity *= -1.3f;
                                     if (Integer.parseInt(levelreaderSplit[i + 5]) == 4) win();
+
+
                                 }
                             }
                         }
@@ -256,6 +302,21 @@ public class MoveLib {
 
     }
 
+
+    static void collectCoin(int i) {
+        for (int b = 0; b < doneCoinCooridnates.length; b+=2) {
+            if (doneCoinCooridnates[b] == Integer.parseInt(levelreaderSplit[i]) && doneCoinCooridnates[b+1] == Integer.parseInt(levelreaderSplit[i+1])) {
+                return;
+            }
+
+            if (doneCoinCooridnates[b] == 0 && doneCoinCooridnates[b+1] == 0) {
+                SoundLib.playSound("coinCollect.wav");
+                doneCoinCooridnates[b] = Integer.parseInt(levelreaderSplit[i]);
+                doneCoinCooridnates[b+1] = Integer.parseInt(levelreaderSplit[i+1]);
+                return;
+            }
+        }
+    }
 
 
 }

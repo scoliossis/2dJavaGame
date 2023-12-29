@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 
 import static scoliosis.GameLibs.MoveLib.*;
 import static scoliosis.GameLibs.Velocity.*;
@@ -74,6 +75,8 @@ public class Game {
     static double millisbetweentick = timebeforetick - timeaftertick;
 
     static int fakefakex = 0;
+
+    public static int[] doneCoinCooridnates = new int[6];
 
 
     public static void game(BufferedImage bi, BufferStrategy bs) throws IOException {
@@ -183,7 +186,31 @@ public class Game {
             if (Integer.parseInt(levelreaderSplit[i + 5]) != 1) {
                 xtodraw = Integer.parseInt(levelreaderSplit[i]) - fakefakex + 75;
                 if (xtodraw <= 480 && xtodraw + Integer.parseInt(levelreaderSplit[i + 2]) >= 0) {
-                    RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), Integer.parseInt(levelreaderSplit[i + 4]), g);
+
+                    if (Integer.parseInt(levelreaderSplit[i + 4]) == 26) {
+
+                        boolean found = false;
+                        for (int n = 0; n < doneCoinCooridnates.length; n+=2) {
+                            if (doneCoinCooridnates[n] == Integer.parseInt(levelreaderSplit[i]) && doneCoinCooridnates[n+1] == Integer.parseInt(levelreaderSplit[i + 1])) {
+                                found = true;
+                            }
+                        }
+
+                        if (ticks % 100 <= 80) {
+                            if (found) RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), RenderLib.getBufferedImage("coin3"), g);
+                            else RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), RenderLib.getBufferedImage("coin1"), g);
+                        }
+
+
+
+                        else {
+                            if (found) RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), RenderLib.getBufferedImage("coin4"), g);
+                            else RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), RenderLib.getBufferedImage("coin2"), g);
+                        }
+                    }
+
+                    else
+                        RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), Integer.parseInt(levelreaderSplit[i + 4]), g);
                 }
             }
         }
@@ -283,6 +310,7 @@ public class Game {
     static void tickGame() {
         ticks++;
         if (ticks == 1) {
+            respawnScreen();
             time = System.currentTimeMillis();
         }
 
@@ -293,7 +321,7 @@ public class Game {
     }
 
     static void drawHUD() {
-        RenderLib.drawString(g, "fps: " + Math.round(fps), 380, 30, 10, "Comic Sans MS", 0, new Color(0, 0, 0));
+        //RenderLib.drawString(g, "fps: " + Math.round(fps), 380, 30, 10, "Comic Sans MS", 0, new Color(0, 0, 0));
 
         RenderLib.drawString(g, new DecimalFormat("#.###").format(timespent), 5, 20, 13, "Comic Sans MS", 0, new Color(0, 0, 0));
 
@@ -403,6 +431,7 @@ public class Game {
             ticks = 0;
             respawning = true;
             lives -= 1;
+            resetCoins();
         }
     }
 
@@ -412,6 +441,8 @@ public class Game {
         win = true;
         findfinish = true;
         xvelocity = 0;
+
+        resetCoins();
 
         if (testing) {
             ScreenLib.changeScreen("leveleditor");
@@ -463,5 +494,10 @@ public class Game {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+
+    public static void resetCoins() {
+        doneCoinCooridnates = new int[6];
     }
 }
