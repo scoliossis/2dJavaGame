@@ -26,6 +26,7 @@ import static scoliosis.GameLibs.MoveLib.*;
 import static scoliosis.GameLibs.Velocity.*;
 import static scoliosis.Libs.RenderLib.background;
 import static scoliosis.Libs.ScreenLib.height;
+import static scoliosis.Libs.ScreenLib.width;
 import static scoliosis.Main.*;
 import static scoliosis.Menus.ChooseLevel.map;
 import static scoliosis.Menus.ChooseLevel.sortedCampaignLevels;
@@ -216,9 +217,64 @@ public class Game {
         }
     }
     static void drawPlayer() {
+
+        // player "sprite" (circle)
         RenderLib.drawCircle(75 + (xcoordinate - fakefakex), ycoordinate - 25, charecterwidth, charecterheight, colorofball, g);
         RenderLib.drawCircleOutline(75 + (xcoordinate - fakefakex), ycoordinate - 25, charecterwidth, charecterheight, outsidering, g);
+
+        // eyes position
+        int leftEyeStartX = 75 + (xcoordinate - fakefakex) + (charecterwidth / 2) - charecterwidth / 4 - 2;
+        int rightEyeStartX = leftEyeStartX + charecterwidth / 2;
+
+        int eyeStartY = ycoordinate - 25 + charecterwidth / 4;
+
+        int eyeWidth = charecterwidth / 4;
+        int eyeHeight = charecterheight / 4;
+
+        // eyes draw
+        RenderLib.drawCircle(leftEyeStartX, eyeStartY, eyeWidth, eyeHeight, new Color(255,255,255, 220), g);
+        RenderLib.drawCircle(rightEyeStartX, eyeStartY, eyeWidth, eyeHeight, new Color(255,255,255, 220), g);
+
+
+        // pupils position
+        int distanceFromEyeCentreX = charecterwidth / 12;
+        int distanceFromEyeCentreY = charecterheight / 12;
+
+        double pupilOffsetX = 0;
+        if (xvelocity > 1 || xvelocity < -1) {
+            pupilOffsetX = Math.max(-distanceFromEyeCentreX, Math.min(((xvelocity / 20 * 360) * Math.PI / 180) / 3, distanceFromEyeCentreX * 2));
+        }
+
+        double pupilOffsetY = 0;
+        if (yvelocity > 1 || yvelocity < 1) {
+            pupilOffsetY = Math.max(-distanceFromEyeCentreY, Math.min((((-yvelocity / 10 * 360) * Math.PI / 180)) / 10 + charecterheight / 12d, distanceFromEyeCentreY * 2));
+        }
+
+        int leftPupilStartX = (int) ((leftEyeStartX + distanceFromEyeCentreX) + pupilOffsetX);
+        int rightPupilStartX = (int) ((rightEyeStartX + distanceFromEyeCentreY) + pupilOffsetX);
+
+        int pupilStartY = (int) (eyeStartY + pupilOffsetY);
+
+
+        // pupils draw
+        RenderLib.drawCircle(leftPupilStartX, pupilStartY, eyeWidth / 2, eyeHeight / 2, new Color(0,0,0, 220), g);
+        RenderLib.drawCircle(rightPupilStartX, pupilStartY, eyeWidth / 2, eyeHeight / 2, new Color(0,0,0, 220), g);
+
+
+        // mouth
+        int mouthHeight = (int) (Math.max(eyeHeight * Math.cos(ticks/75d), 1));
+
+        if (xvelocity > 10 || xvelocity < -10) {
+            mouthHeight = eyeHeight;
+        }
+
+        RenderLib.drawCircleOutline(75 + (xcoordinate - fakefakex) + (charecterwidth / 2) - (charecterwidth / 8), ycoordinate - 25 + charecterwidth / 2, eyeWidth, mouthHeight, new Color(0,0,0), g);
+
+
     }
+
+
+
     static void drawLevelBackLayer() {
         for (int i = 0; i < levelreaderSplit.length; i += 6) {
             if (Integer.parseInt(levelreaderSplit[i + 5]) == 1) {

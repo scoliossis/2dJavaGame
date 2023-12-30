@@ -1,6 +1,8 @@
 package scoliosis.Menus;
 
 import scoliosis.Game;
+import scoliosis.GameLibs.MoveLib;
+import scoliosis.GameLibs.Velocity;
 import scoliosis.Libs.KeyLib;
 import scoliosis.Libs.MouseLib;
 import scoliosis.Libs.RenderLib;
@@ -68,6 +70,10 @@ public class ChooseLevel {
 
                                         Game.loadMap(sortedCampaignLevels[map]);
                                         map++;
+
+                                        Velocity.xcoordinate = MoveLib.spawnx;
+                                        Velocity.ycoordinate = MoveLib.spawny;
+
                                     }
                                     ScreenLib.changeScreen("game");
 

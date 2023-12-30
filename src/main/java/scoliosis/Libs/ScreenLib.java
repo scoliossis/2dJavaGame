@@ -51,6 +51,7 @@ public class ScreenLib {
     }
 
     public static void changeScreen(String screenname) {
+
         if ((Display.pausescreen && screenname == "game") || (Display.ingame && screenname == "pause")) {
             Velocity.xvelocity = 0;
             Velocity.yvelocity = 0;
@@ -63,7 +64,12 @@ public class ScreenLib {
         }
         else Game.ticks = 0;
 
+        if (screenname != "pause") Game.win = false;
+
         if (screenname == "levels") {
+
+            Game.resetCoins();
+
             int length = background.length-2; // the last 2 backgrounds do not match the others and look out of place
             int randonum = ((int) (Math.random() * length));
             int randonum2 = (randonum+1 >= length ? randonum+1-length : randonum+1);
