@@ -5,7 +5,7 @@ public class Configs {
 
     @Property(type = Property.Type.BOOLEAN, name = "no sprint mode", description = "when in levels, you will be UNABLE to use sprint (is possible to do the campaign through \"bugs\", hf)")
     public static boolean noSprint = false;
-    @Property(type = Property.Type.BOOLEAN, name = "no jump mode", description = "when in levels, you will be UNABLE to use jump (gl ;3 idk if this is possible for the campaign)")
+    @Property(type = Property.Type.BOOLEAN, name = "no jump mode", description = "when in levels, you will be UNABLE to use jump (campaign IS possible, gl ;3)")
     public static boolean noJump = false;
 
     @Property(type = Property.Type.BOOLEAN, name = "hard mode", description = "no gaining lives after level completion in campaign")

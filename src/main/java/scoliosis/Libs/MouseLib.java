@@ -51,6 +51,7 @@ public class MouseLib implements AWTEventListener {
 
 
     public static int mousexcoord(float divnum) {
+        // smth is wrong with this idk what, but at grid sizes > 10 its ofset by 1 square. i assume smth with (8f/ (Display.mainframe.getWidth()/480f))) but idk ill fix later
         return (int) (((MouseInfo.getPointerInfo().getLocation().x - Display.mainframe.getX() - (8f/ (Display.mainframe.getWidth()/480f))) / divnum) / (Display.mainframe.getWidth()/480f));
     };
 

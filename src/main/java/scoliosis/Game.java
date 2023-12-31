@@ -6,7 +6,10 @@ import scoliosis.Libs.ScreenLib;
 import scoliosis.Libs.RenderLib;
 import scoliosis.Menus.ChooseLevel;
 import scoliosis.Menus.LevelEditor;
+import scoliosis.Menus.OptionsScreen;
 import scoliosis.Options.Configs;
+import scoliosis.Options.Setting;
+import scoliosis.Options.Settings.BooleanSetting;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -22,6 +25,7 @@ import java.nio.file.OpenOption;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import static scoliosis.GameLibs.MoveLib.*;
 import static scoliosis.GameLibs.Velocity.*;
@@ -391,7 +395,24 @@ public class Game {
             RenderLib.drawImage(419 + i*17, 9, 16, 16, RenderLib.getBufferedImage("coin1"), g);
         }
 
+        Iterator allsettings = OptionsScreen.settings.iterator();
 
+        int setnum = 0;
+        int setnum2 = 0;
+
+        while (allsettings.hasNext()) {
+            Setting setting = (Setting) allsettings.next();
+
+            if (setting instanceof BooleanSetting) {
+                if ((Boolean) setting.get(Boolean.class)) {
+                    RenderLib.drawImage(25 * setnum2, 250, 20, 20, RenderLib.getBufferedImage(challenges[setnum]), g);
+
+                    setnum2++;
+                }
+            }
+
+            setnum++;
+        }
 
 
     }

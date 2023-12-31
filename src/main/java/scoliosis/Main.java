@@ -91,6 +91,8 @@ public class Main {
 
     public static String[] textures = {"dirt", "grass", "sand", "poison", "lavabrick", "coal", "lava", "smoke", "flagpole", "base", "circle", "triangle", "square", "brick", "bluebrick", "whitebrick", "purplebrick", "redbrick", "brownbrick", "stone", "darkstone", "water", "fungaldirt", "fungalgrass", "fungalwater", "mossybrick", "coin1"};
 
+    public static String[] challenges = {"noSprint", "noJump", "hard", "hardcore", "collector"};
+
 
     public static String scoliosis = System.getenv("APPDATA") + "\\scoliosis";
     public static String baseName = System.getenv("APPDATA") + "\\scoliosis\\2dBallGame";

@@ -74,7 +74,7 @@ public class LevelEditor {
 
     static boolean lockedonMove = false;
 
-    static String[] blockTypes = {"normal", "background", "foreground", "spike", "goal", "coin"};
+    static String[] blockTypes = {"normal", "background", "foreground", "spike", "goal"};
     static boolean blockTypesShow = false;
 
     static float theWide = 66;
@@ -397,6 +397,7 @@ public class LevelEditor {
 
                             if (leftclicked && !mouseclicked && MouseLib.isMouseOverCoords(142, 15 + (15 * (i+1)), 66, 16)) {
                                 blocktype = i;
+                                leftclicked = false;
                                 blockTypesShow = false;
                             }
                         }
