@@ -152,6 +152,12 @@ public class LevelEditor {
                     rightclickedposy = realmouseycoord();
                 }
 
+
+                if (((leftclicked && !mouseclicked) || (rightclicked && !rightclicker))) {
+                    leftclickedpos[0] = mousexcoord(boxsize);
+                    leftclickedpos[1] = mouseycoord(boxsize);
+                }
+
                 if (((leftclicked && mouseclicked && leftclickedposy > 40) || (rightclicked && rightclicker && rightclickedposy > 40)) && realmouseycoord() <= 40) {
                     acter = true;
                     showtopbar = false;
@@ -169,11 +175,6 @@ public class LevelEditor {
                     xoffset -= 15;
                 }
 
-                if (((leftclicked && !mouseclicked) || (rightclicked && !rightclicker)) && shapeMode != 0) {
-                    leftclickedpos[0] = mousexcoord(boxsize);
-                    leftclickedpos[1] = mouseycoord(boxsize);
-                }
-
                 if (leftclicked && !mouseclicked && MouseLib.isMouseOverCoords((int) (spawnx * (zoomed / 10f) + xoffset), (int) (spawny - (25 * (zoomed / 10f))), (int) (25 * (zoomed / 10f)), (int) (25 * (zoomed / 10f)))) {
                     lockedonMove = true;
                 }
@@ -187,37 +188,68 @@ public class LevelEditor {
                 }
 
 
-                if (shapeMode >= 1 && ((leftclicked && mouseclicked) || (rightclicked && rightclicker))) {
-                    int xco = (int) ((int) ((int) ((((leftclickedpos[0] * boxsize - xoffset) / (zoomed / 10f)) + (xoffset % boxsize)))) * (zoomed / 10f) + xoffset);
-                    int wid = (MouseLib.mousexcoord(boxsize)-leftclickedpos[0]) * boxsize + boxsize;
-                    int yco = leftclickedpos[1] * boxsize;
-                    int hei = (MouseLib.mouseycoord(boxsize) - leftclickedpos[1]) * boxsize + boxsize;
+                if ((realmouseycoord() >= 35 || !showtopbar)
+                        && !MouseLib.isMouseOverCoords(420, 0, 30, 20) &&
+                        !MouseLib.isMouseOverCoords(420, 30, 30, 20)) {
+
+                    if (shapeMode >= 1 && ((leftclicked && mouseclicked) || (rightclicked && rightclicker))) {
+                        int xco = (int) ((int) ((int) ((((leftclickedpos[0] * boxsize - xoffset) / (zoomed / 10f)) + (xoffset % boxsize)))) * (zoomed / 10f) + xoffset);
+                        int wid = (MouseLib.mousexcoord(boxsize) - leftclickedpos[0]) * boxsize + boxsize;
+                        int yco = leftclickedpos[1] * boxsize;
+                        int hei = (MouseLib.mouseycoord(boxsize) - leftclickedpos[1]) * boxsize + boxsize;
 
 
-                    for (int x = Math.min(wid/boxsize, 0); x < Math.max(wid/boxsize, 0); x++) {
-                        for (int y = Math.min(hei/boxsize, 0); y < Math.max(hei/boxsize, 0); y++) {
-                            shapeX = xco;
-                            shapeY = yco;
-                            shapeW = wid;
-                            shapeH = hei;
+                        for (int x = Math.min(wid / boxsize, 0); x < Math.max(wid / boxsize, 0); x++) {
+                            for (int y = Math.min(hei / boxsize, 0); y < Math.max(hei / boxsize, 0); y++) {
+                                shapeX = xco;
+                                shapeY = yco;
+                                shapeW = wid;
+                                shapeH = hei;
 
-                            if (leftclicked) RenderLib.drawImage(x*boxsize + xco, y*boxsize + yco, boxsize, boxsize, block, g);
+                                if (leftclicked)
+                                    RenderLib.drawImage(x * boxsize + xco, y * boxsize + yco, boxsize, boxsize, block, g);
+                            }
                         }
+
+                        if (rightclicker) RenderLib.drawOutline(xco, yco, wid, hei, new Color(255, 0, 0), g);
+
                     }
 
-                    if (rightclicker) RenderLib.drawOutline(xco, yco, wid, hei, new Color(255,0,0), g);
+                    if (shapeMode >= 1) {
+                        if (!leftclicked && mouseclicked) {
+                            for (int x = Math.min(shapeW, 0); x < Math.max(shapeW, 0); x += boxsize) {
+                                for (int y = Math.min(shapeH, 0); y < Math.max(shapeH, 0); y += boxsize) {
 
-                }
+                                    boolean founded = false;
+                                    for (int i = 0; i < Locations.size(); i += 6) {
+                                        if ((int) Locations.get(i) == shapeX + x - xoffset && (int) Locations.get(i + 1) == shapeY + y) {
+                                            if (shapeMode == 2) {
+                                                Locations.remove(i);
+                                                Locations.remove(i);
+                                                Locations.remove(i);
+                                                Locations.remove(i);
+                                                Locations.remove(i);
+                                                Locations.remove(i);
+                                            } else founded = true;
+                                        }
+                                    }
 
-                if (shapeMode >= 1) {
-                    if (!leftclicked && mouseclicked) {
-                        for (int x = Math.min(shapeW, 0); x < Math.max(shapeW, 0); x += boxsize) {
-                            for (int y = Math.min(shapeH, 0); y < Math.max(shapeH, 0); y += boxsize) {
+                                    if (!founded) {
+                                        Locations.add(shapeX + x - xoffset);
+                                        Locations.add(shapeY + y);
+                                        Locations.add((int) (1 * boxsize / (zoomed / 10f)));
+                                        Locations.add((int) (1 * boxsize / (zoomed / 10f)));
 
-                                boolean founded = false;
-                                for (int i = 0; i < Locations.size(); i += 6) {
-                                    if ((int) Locations.get(i) == shapeX + x - xoffset && (int) Locations.get(i + 1) == shapeY + y) {
-                                        if (shapeMode == 2) {
+                                        Locations.add(block);
+                                        Locations.add(blocktype);
+                                    }
+                                }
+                            }
+                        } else if (!rightclicked && rightclicker) {
+                            for (int x = 0; x < shapeW; x += boxsize) {
+                                for (int y = 0; y < shapeH; y += boxsize) {
+                                    for (int i = 0; i < Locations.size(); i += 6) {
+                                        if ((int) Locations.get(i) == shapeX + x - xoffset && (int) Locations.get(i + 1) == shapeY + y) {
                                             Locations.remove(i);
                                             Locations.remove(i);
                                             Locations.remove(i);
@@ -225,32 +257,6 @@ public class LevelEditor {
                                             Locations.remove(i);
                                             Locations.remove(i);
                                         }
-                                        else founded = true;
-                                    }
-                                }
-
-                                if (!founded) {
-                                    Locations.add(shapeX + x - xoffset);
-                                    Locations.add(shapeY + y);
-                                    Locations.add((int) (1 * boxsize / (zoomed / 10f)));
-                                    Locations.add((int) (1 * boxsize / (zoomed / 10f)));
-
-                                    Locations.add(block);
-                                    Locations.add(blocktype);
-                                }
-                            }
-                        }
-                    } else if (!rightclicked && rightclicker) {
-                        for (int x = 0; x < shapeW; x += boxsize) {
-                            for (int y = 0; y < shapeH; y += boxsize) {
-                                for (int i = 0; i < Locations.size(); i += 6) {
-                                    if ((int) Locations.get(i) == shapeX + x - xoffset && (int) Locations.get(i + 1) == shapeY + y) {
-                                        Locations.remove(i);
-                                        Locations.remove(i);
-                                        Locations.remove(i);
-                                        Locations.remove(i);
-                                        Locations.remove(i);
-                                        Locations.remove(i);
                                     }
                                 }
                             }
@@ -261,7 +267,8 @@ public class LevelEditor {
 
 
                 if ((leftclicked || rightclicked) && (realmouseycoord() >= 35 || !showtopbar) && shapeMode == 0 && !lockedonMove && !blockTypesShow
-                        && !MouseLib.isMouseOverCoords(430, 0, 16, 10) && !MouseLib.isMouseOverCoords(430, 30, 16, 10)) {
+                        && (!MouseLib.isMouseOverCoords(430, 0, 16, 20)) &&
+                        !(MouseLib.isMouseOverCoords(430, 30, 16, 20))) {
 
                     boolean dontadd = false;
                     for (int i = 0; i < Locations.size(); i += 6) {
@@ -318,8 +325,6 @@ public class LevelEditor {
 
                     }
                 }
-
-
 
                 RenderLib.drawCircle((int) (spawnx * (zoomed / 10f) + xoffset), (int) (spawny - (25 * (zoomed / 10f))), (int) (25 * (zoomed / 10f)), (int) (25 * (zoomed / 10f)), new Color(160, 250, 239), g);
 
@@ -398,7 +403,9 @@ public class LevelEditor {
                     }
 
                     if (isMouseOverCoords(142, 18, 66, 14)) {
-                        if (leftclicked && !mouseclicked) blockTypesShow = !blockTypesShow;
+                        if (leftclicked && !mouseclicked) {
+                            blockTypesShow = !blockTypesShow;
+                        }
                     }
 
                     if (!blockTypesShow) RenderLib.drawOutline(142, 18, 66, 14, new Color(48, 51, 63), g);
@@ -409,8 +416,9 @@ public class LevelEditor {
                     RenderLib.drawRect(430, 35, 16, 10, new Color(215, 216, 229), g);
                     RenderLib.drawPoligon(new int[]{434, 438, 442}, new int[]{43, 37, 43}, new Color(48, 51, 63), g);
 
-                    if (MouseLib.isMouseOverCoords(430, 35, 16, 10) && leftclicked && !mouseclicked) {
+                    if (MouseLib.isMouseOverCoords(430, 35, 16, 10) && leftclicked && showtopbar) {
                         showtopbar = false;
+                        leftclicked = false;
                     }
 
                     RenderLib.drawRect(210, 3, 210, 26, new Color(215, 216, 229), g);
@@ -437,8 +445,9 @@ public class LevelEditor {
                     RenderLib.drawRect(430, 0, 16, 10, new Color(215, 216, 229), g);
                     RenderLib.drawPoligon(new int[]{434, 438, 442}, new int[]{2, 8, 2}, new Color(48, 51, 63), g);
 
-                    if (MouseLib.isMouseOverCoords(430, 0, 16, 10) && leftclicked && !mouseclicked) {
+                    if (MouseLib.isMouseOverCoords(430, 0, 16, 10) && leftclicked) {
                         showtopbar = true;
+                        leftclicked = false;
                     }
                 }
 

@@ -6,6 +6,7 @@ import scoliosis.Libs.ScreenLib;
 import scoliosis.Libs.RenderLib;
 import scoliosis.Menus.ChooseLevel;
 import scoliosis.Menus.LevelEditor;
+import scoliosis.Options.Configs;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -79,6 +80,7 @@ public class Game {
 
     public static int[] doneCoinCooridnates = new int[6];
 
+    public static int coins = 0;
 
     public static void game(BufferedImage bi, BufferStrategy bs) throws IOException {
         if (bs != null) {
@@ -91,6 +93,7 @@ public class Game {
                 getFPS();
 
                 drawGame();
+
             }
         }
     }
@@ -150,7 +153,7 @@ public class Game {
     }
 
     static void ShouldKillPlayer() {
-        if (ycoordinate > 270 || (KeyLib.keyPressed(KeyEvent.VK_R)) && !(ChooseLevel.campaign && win)) {
+        if (ycoordinate > 300 || (KeyLib.keyPressed(KeyEvent.VK_R)) && !(ChooseLevel.campaign && win)) {
             KillPlayer();
         }
     }
@@ -197,17 +200,9 @@ public class Game {
                             }
                         }
 
-                        if (ticks % 100 <= 80) {
-                            if (found) RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), RenderLib.getBufferedImage("coin3"), g);
-                            else RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), RenderLib.getBufferedImage("coin1"), g);
-                        }
+                        if (found) RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), RenderLib.getBufferedImage("coin3"), g);
+                        else RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), RenderLib.getBufferedImage("coin1"), g);
 
-
-
-                        else {
-                            if (found) RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), RenderLib.getBufferedImage("coin4"), g);
-                            else RenderLib.drawImage(xtodraw, Integer.parseInt(levelreaderSplit[i + 1]), Integer.parseInt(levelreaderSplit[i + 2]), Integer.parseInt(levelreaderSplit[i + 3]), RenderLib.getBufferedImage("coin2"), g);
-                        }
                     }
 
                     else
@@ -286,14 +281,16 @@ public class Game {
         }
     }
     static void writeNewPB() throws IOException {
+        Main.getCompletedLevels();
+
         if (!wrotefile) {
             wrotefile = true;
 
             String readfile;
             String whattowrite = lastLoadedMap + ":" + timespent + ",";
 
-            if (Files.exists(Paths.get(resourcesFile + "/times.scolio"))) {
-                readfile = Files.readAllLines(Paths.get(resourcesFile + "/times.scolio")).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
+            if (Files.exists(Paths.get(baseName + "/times.scolio"))) {
+                readfile = Files.readAllLines(Paths.get(baseName + "/times.scolio")).toString().replaceAll("\\[", "").replaceAll("]", "").replaceAll(" ", "");
                 if (readfile.contains(lastLoadedMap)) {
                     String[] splittext = readfile.split(",");
                     for (int i = 0; i < splittext.length; i++) {
@@ -317,7 +314,7 @@ public class Game {
                 }
             }
 
-            BufferedWriter writer = new BufferedWriter(new FileWriter(resourcesFile + "/times.scolio"));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(baseName + "/times.scolio"));
             writer.write(whattowrite);
             writer.close();
         }
@@ -351,7 +348,9 @@ public class Game {
     static void campaignNextLevelCheck() {
         if (ChooseLevel.campaign && xvelocity > 10) {
             win = false;
-            lives += 2;
+
+            if (Configs.hardMode || Configs.hardcore) lives += 1;
+            else lives += 2;
             overalltimetaken += timespent;
             KillPlayer();
 
@@ -382,7 +381,18 @@ public class Game {
         RenderLib.drawString(g, new DecimalFormat("#.###").format(timespent), 5, 20, 13, "Comic Sans MS", 0, new Color(0, 0, 0));
 
         if (ChooseLevel.campaign)
-            RenderLib.drawString(g, "lives: " + lives, 5, 50, 13, "Comic Sans MS", 1, new Color(255, 0, 136));
+            if (!Configs.hardcore) RenderLib.drawString(g, "lives: " + lives, 5, 50, 13, "Comic Sans MS", 1, new Color(255, 0, 136));
+
+        RenderLib.drawImage(420, 10, 15, 15, RenderLib.getBufferedImage("coin3"), g);
+        RenderLib.drawImage(437, 10, 15, 15, RenderLib.getBufferedImage("coin3"), g);
+        RenderLib.drawImage(454, 10, 15, 15, RenderLib.getBufferedImage("coin3"), g);
+
+        for (int i = 0; i < coins; i++) {
+            RenderLib.drawImage(419 + i*17, 9, 16, 16, RenderLib.getBufferedImage("coin1"), g);
+        }
+
+
+
 
     }
 
@@ -479,6 +489,8 @@ public class Game {
 
     public static void KillPlayer() {
         if (!(win && ChooseLevel.campaign)) {
+            if (Configs.hardcore) lives = 0;
+
             xcoordinate = spawnx;
             ycoordinate = spawny;
             xvelocity = 0;
@@ -494,23 +506,28 @@ public class Game {
     public static boolean win = false;
 
     public static void win() {
-        win = true;
-        findfinish = true;
-        xvelocity = 0;
-
-        resetCoins();
-
-        if (testing) {
-            ScreenLib.changeScreen("leveleditor");
-            testing = false;
-
-            xcoordinate = spawnx;
-            ycoordinate = spawny;
+        if (coins == 3 || !Configs.collector) {
+            win = true;
+            findfinish = true;
             xvelocity = 0;
-            yvelocity = 0;
-            win = false;
-            ticks = 0;
-            respawning = true;
+
+            resetCoins();
+
+            if (testing) {
+                ScreenLib.changeScreen("leveleditor");
+                testing = false;
+
+                xcoordinate = spawnx;
+                ycoordinate = spawny;
+                xvelocity = 0;
+                yvelocity = 0;
+                win = false;
+                ticks = 0;
+                respawning = true;
+            }
+        }
+        else {
+            KillPlayer();
         }
     }
 
@@ -555,5 +572,6 @@ public class Game {
 
     public static void resetCoins() {
         doneCoinCooridnates = new int[6];
+        coins = 0;
     }
 }

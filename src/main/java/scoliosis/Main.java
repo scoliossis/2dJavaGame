@@ -4,6 +4,7 @@ import scoliosis.Libs.MouseLib;
 import scoliosis.Libs.RenderLib;
 import scoliosis.Libs.SoundLib;
 import scoliosis.Menus.ChooseLevel;
+import scoliosis.Options.Config;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -33,6 +34,7 @@ public class Main {
     death screen / animation - added to list: 3/12/23 - DONE 05/12/23 20:33
     levels screen - added to list: 3/12/23 - DONE 09/12/23 17:02
     store multiple levels - added to list: 3/12/23 - DONE 03/12/23 21:16
+    coins!!! - added to list: 28/12/23 - DONE 28/12/23 ~20:00
 
     ---- bug fixes ----
      ̶n̶o̶ ̶c̶o̶l̶l̶i̶s̶i̶o̶n̶s̶ ̶i̶n̶ ̶n̶e̶g̶a̶t̶i̶v̶e̶ ̶c̶o̶o̶r̶d̶i̶n̶a̶t̶e̶s̶ ̶-̶ ̶a̶d̶d̶e̶d̶ ̶t̶o̶ ̶l̶i̶s̶t̶ ̶0̶5̶/̶1̶2̶/̶2̶3̶ - idrc, its not needed for now
@@ -57,12 +59,20 @@ public class Main {
     make campaign - added to list: 3/12/23 - Started:
         level 1-1 - 03/12/23 19:41
         level 1-2 - 09/12/23 17:01
+        level 1-3 - ~20/12/23
+        level 1-4 - ~21/12/23
+
+        level 2-1 - 29/12/23
+        level 2-2 - 29/12/23
+        level 2-3 - 29/12/23
+
         level 8-1 - 05/12/23 8:20
 
     add enemies with set paths - added to list: 3/12/23
     add music - added to list: 3/12/23
     make special tab for custom levels - added to list: 7/12/23
     make hard mode / hardcore - added to list: 7/12/23
+    make no jump / no sprint mode! - added to list: 30/12/23
 
     ---- bug fixes ----
     fps issues ig - added to list 09/12/23
@@ -98,12 +108,13 @@ public class Main {
 
         ChooseLevel.getLevels();
         getCompletedLevels();
+        Config.load();
     }
 
     public static void getCompletedLevels() {
-        if (Files.exists(Paths.get(resourcesFile + "/times.scolio"))) {
+        if (Files.exists(Paths.get(baseName + "/times.scolio"))) {
             try {
-                String fileInfo = Files.readAllLines(Paths.get(resourcesFile + "/times.scolio")).toString();
+                String fileInfo = Files.readAllLines(Paths.get(baseName + "/times.scolio")).toString();
                 String[] fileSplit = fileInfo.replaceAll("\\[", "").replaceAll("]", "").split(",");
                 completedLevels = new String[fileSplit.length];
                 for (int i = 0; i < fileSplit.length; i++) {

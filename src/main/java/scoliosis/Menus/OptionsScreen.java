@@ -62,9 +62,15 @@ public class OptionsScreen {
                     defx = 10;
                 }
 
-                if (leftclicked != MouseLib.leftclicked && MouseLib.leftclicked && MouseLib.isMouseOverCoords(defx, i, 200, 50)) {
-                    leftclicked = MouseLib.leftclicked;
-                    setting.set(!(Boolean) setting.get(Boolean.class));
+                if (MouseLib.isMouseOverCoords(defx, i, 200, 50)) {
+
+                    RenderLib.drawRect(0,0, 480, 20, new Color(22,22,22,22), g);
+                    RenderLib.drawString(g, setting.description, 5, 13, 8, "Comic Sans MS", 0, new Color(255,255,255));
+
+                    if (leftclicked != MouseLib.leftclicked && MouseLib.leftclicked) {
+                        leftclicked = MouseLib.leftclicked;
+                        setting.set(!(Boolean) setting.get(Boolean.class));
+                    }
                 }
 
 

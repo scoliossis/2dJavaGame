@@ -3,6 +3,7 @@ package scoliosis.GameLibs;
 import scoliosis.Game;
 import scoliosis.Libs.KeyLib;
 import scoliosis.Libs.SoundLib;
+import scoliosis.Options.Configs;
 
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
@@ -262,10 +263,12 @@ public class MoveLib {
 
                 onground = onGround;
 
-                if (KeyLib.keyPressed(KeyEvent.VK_SPACE)) {
-                    if (onGround || System.currentTimeMillis() - timesinceleftground < 50 && !onWall) {
-                        timesinceleftground = 0;
-                        yvelocity = 7;
+                if (!Configs.noJump) {
+                    if (KeyLib.keyPressed(KeyEvent.VK_SPACE)) {
+                        if (onGround || System.currentTimeMillis() - timesinceleftground < 50 && !onWall) {
+                            timesinceleftground = 0;
+                            yvelocity = 7;
+                        }
                     }
                 }
 
@@ -275,14 +278,16 @@ public class MoveLib {
                     if (yvelocity > -10f) yvelocity -= 0.5f;
                 }
 
-                if (System.currentTimeMillis() - timesincespeedtoggle > 250 || !KeyLib.isKeyDown(KeyEvent.VK_SHIFT)) {
-                    sprinting = false;
-                }
+                if (!Configs.noSprint) {
+                    if (System.currentTimeMillis() - timesincespeedtoggle > 250 || !KeyLib.isKeyDown(KeyEvent.VK_SHIFT)) {
+                        sprinting = false;
+                    }
 
-                if (KeyLib.isKeyDown(KeyEvent.VK_SHIFT) && (System.currentTimeMillis() - timesincespeedtoggle > 500 || onGround) && !sprintedInAir) {
-                    sprinting = true;
-                    sprintedInAir = true;
-                    timesincespeedtoggle = System.currentTimeMillis();
+                    if (KeyLib.isKeyDown(KeyEvent.VK_SHIFT) && (System.currentTimeMillis() - timesincespeedtoggle > 500 || onGround) && !sprintedInAir) {
+                        sprinting = true;
+                        sprintedInAir = true;
+                        timesincespeedtoggle = System.currentTimeMillis();
+                    }
                 }
 
                 if (KeyLib.isKeyDown(KeyEvent.VK_S) && !sprinting && !onGround) {
@@ -302,7 +307,6 @@ public class MoveLib {
 
     }
 
-
     static void collectCoin(int i) {
         for (int b = 0; b < doneCoinCooridnates.length; b+=2) {
             if (doneCoinCooridnates[b] == Integer.parseInt(levelreaderSplit[i]) && doneCoinCooridnates[b+1] == Integer.parseInt(levelreaderSplit[i+1])) {
@@ -310,6 +314,8 @@ public class MoveLib {
             }
 
             if (doneCoinCooridnates[b] == 0 && doneCoinCooridnates[b+1] == 0) {
+
+                coins++;
                 SoundLib.playSound("coinCollect.wav");
                 doneCoinCooridnates[b] = Integer.parseInt(levelreaderSplit[i]);
                 doneCoinCooridnates[b+1] = Integer.parseInt(levelreaderSplit[i+1]);

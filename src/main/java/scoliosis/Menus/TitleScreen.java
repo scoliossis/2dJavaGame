@@ -28,12 +28,12 @@ public class TitleScreen {
 
             g.drawImage(RenderLib.getBufferedImage("titlescreen"), 0, 0, ScreenLib.width, ScreenLib.height, null);
 
-            RenderLib.drawString(g, "game made by scoliosis!", 20, 30, 30, "Comic Sans MS", Font.BOLD, new Color(255,255,255));
+            //RenderLib.drawString(g, "game made by scoliosis!", 20, 30, 30, "Comic Sans MS", Font.BOLD, new Color(255,255,255));
 
 
             for (int i = 0; i < titlebuttons.length; i++) {
 
-                if (MouseLib.isMouseOverCoords(0, 270 - 170 + (i * 40), g.getFontMetrics().stringWidth("start") + 30, 30)) {
+                if (MouseLib.isMouseOverCoords(0, 270 - 170 + (i * 40), 300, 30)) {
 
                     RenderLib.drawString(g, titlebuttons[i], 0, 270 - 142 + (i * 40), 43, "SansSerif", Font.ITALIC, new Color(255,255,255));
 

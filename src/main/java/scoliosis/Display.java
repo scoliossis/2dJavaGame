@@ -67,9 +67,10 @@ public class Display extends Canvas {
         Display game = new Display();
 
         mainframe = new JFrame("scoliosis on top!");
+        mainframe.setUndecorated(true);
         mainframe.add(game);
         mainframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainframe.setSize((int) screenSize.getWidth() / 4, (int) screenSize.getHeight() / 4);
+        mainframe.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
         mainframe.setLocationRelativeTo(null);
         mainframe.setVisible(true);
 

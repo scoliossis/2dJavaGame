@@ -2,6 +2,7 @@ package scoliosis.Libs;
 
 import javafx.scene.SubScene;
 import scoliosis.Display;
+import scoliosis.Game;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -219,6 +220,12 @@ public class RenderLib {
         graphics.drawString(text, x, (int) (y/270f *(float) (mainframe.getHeight())));
     }
 
+    public static int getStringWidth(String text, Font font, Graphics graphics) {
+
+        graphics.setFont(new Font(font.getName(), font.getStyle(), (int) (font.getSize()/480f *(float) (mainframe.getWidth()))));
+
+        return graphics.getFontMetrics().stringWidth(text);
+    }
 
     public static void drawLine(int x, int y, int x2, int y2, Color color, Graphics g) {
         x = (int) (x/480f *(float) (mainframe.getWidth()));
@@ -315,6 +322,9 @@ public class RenderLib {
 
     public static BufferedImage getBufferedImage(String h) {
         BufferedImage image2 = allimages[0];
+
+        if (Game.ticks % 100 >= 80 && h == "coin1") h="coin2";
+        else if (h == "coin3" && Game.ticks % 100 >= 30 && Game.ticks % 100 <= 40) h = "coin4";
 
         for (int i = 0; i < numberOfImages; i++) {
             if (ImageNames[i].replace(".png", "").replace(" ", "").equalsIgnoreCase(h)) {
